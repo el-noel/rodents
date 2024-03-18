@@ -5,6 +5,7 @@ from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
 import csv
+import html
 
 # Open the CSV file for reading
 
@@ -34,6 +35,8 @@ json_file_path = os.path.join(current_directory, 'init.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
     bg_df = pd.DataFrame(data)
+    bg_df = bg_df.applymap(lambda x: html.unescape(x) if isinstance(x, str) else x)
+    bg_df['baverage'] = bg_df['baverage'].round(2)
 
 app = Flask(__name__)
 CORS(app)
@@ -58,35 +61,3 @@ def bg_search():
 
 if 'DB_NAME' not in os.environ:
     app.run(debug=True,host="0.0.0.0",port=5000)
-
-# json_file_path = os.path.join(current_directory, 'init.json')
-
-# # Assuming your JSON data is stored in a file named 'init.json'
-# with open(json_file_path, 'r') as file:
-#     data = json.load(file)
-#     _df = pd.DataFrame(data['episodes'])
-#     reviews_df = pd.DataFrame(data['reviews'])
-
-# app = Flask(__name__)
-# CORS(app)
-
-# # Sample search using json with pandas
-# def json_search(query):
-#     matches = []
-#     merged_df = pd.merge(episodes_df, reviews_df, left_on='id', right_on='id', how='inner')
-#     matches = merged_df[merged_df['title'].str.lower().str.contains(query.lower())]
-#     matches_filtered = matches[['title', 'descr', 'imdb_rating']]
-#     matches_filtered_json = matches_filtered.to_json(orient='records')
-#     return matches_filtered_json
-
-# @app.route("/")
-# def home():
-#     return render_template('base.html',title="sample html")
-
-# @app.route("/episodes")
-# def episodes_search():
-#     text = request.args.get("title")
-#     return json_search(text)
-
-# if 'DB_NAME' not in os.environ:
-#     app.run(debug=True,host="0.0.0.0",port=5000)
