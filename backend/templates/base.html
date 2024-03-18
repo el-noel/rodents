@@ -7,6 +7,13 @@
 <body>
     <div class="full-body-container">
         <div class="top-text">
+            <! -- issue here is that filters disappear when results come up, need to fix that-- >
+            <div class="filters">
+                <! -- min age max age filters input -- >
+                <input placeholder="Min Age" id="min-age" type="number" />
+                <input placeholder="Max Age" id="max-age" type="number" />
+                <button onclick="filterText()">Search</button>
+            </div>
             <div class="google-colors">
                 <h1 id="google-4">4</h1>
                 <h1 id="google-3">3</h1>
@@ -15,21 +22,23 @@
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a Keeping up with the Kardashians episode" id="filter-text-val" onkeyup="filterText()">
+                <input placeholder="Search for a Board Game" id="filter-text-val" onkeyup="filterText()">
             </div>
         </div>
         <div id="answer-box">
 
         </div>
+
     </div>
 
     <script>
 
-        function answerBoxTemplate(title,titleDesc,rating){
-            return `<div class=''>
-                <h3 class='episode-title'>${title}</h3>
-                <p class='episode-desc'>${titleDesc}</p>
-                <p class='episode-rating'>IMDB Rating: ${rating}</p>
+        function answerBoxTemplate(name, description, average){
+            return `<div class='search-result'>
+                
+                <h3 class='game-title'>${name}</h3>
+                <p class='game-desc'>${description}</p>
+                <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p> <!-- Added the rating display here -->
             </div>`
         }
 
@@ -38,18 +47,29 @@
         }
 
         function filterText(){
-            document.getElementById("answer-box").innerHTML = ""
-            console.log(document.getElementById("filter-text-val").value)
-            fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-            .then((response) => response.json())
-            .then((data) => data.forEach(row => {
-                
-                let tempDiv = document.createElement("div")
-                tempDiv.innerHTML = answerBoxTemplate(row.title,row.descr,row.imdb_rating)
-                document.getElementById("answer-box").appendChild(tempDiv)
-            }));
+            const titleValue = document.getElementById("filter-text-val").value;
+            const minAgeValue = document.getElementById("min-age").value;
+            const maxAgeValue = document.getElementById("max-age").value;
+            
+            const queryParams = new URLSearchParams({
+                title: titleValue,
+                min_age: minAgeValue,
+                max_age: maxAgeValue
+            }).toString();
 
-        }
+            document.getElementById("answer-box").innerHTML = ""
+            fetch("/episodes?" + queryParams)
+            .then((response) => response.json())
+            .then((data) => {
+                const answerBox = document.getElementById("answer-box");
+                answerBox.innerHTML = "";
+                data.forEach(row => {
+                    let tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average);
+                    answerBox.appendChild(tempDiv);
+                });
+        });
+    }
             
     </script>
 </body>
