@@ -6,16 +6,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 <body>
     <div class="full-body-container">
-
         <div class="overlay-container">
             <div class="top-text">
-                Text
-                <form action="/episodes" method="get">
+                Rodents
                     <div class="input-box" onclick="sendFocus()">
                         <img src="{{ url_for('static', filename='images/mag.png') }}" />
                         <input name="title" placeholder="Search for a Boardgame" id="filter-text-val">
                     </div>
-                </form>
             </div>
             <div class="sliding-row">
                 <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
@@ -26,39 +23,31 @@
                 <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
             </div>
         </div>
-        <div id="answer-box"></div>
-
-            <div class="filters">
-                <input placeholder="Min Age" id="min-age" type="number" />
-                <input placeholder="Min Players" id="min-players" type="number" />
-                <input placeholder="Max Players" id="max-players" type="number" />
-                <input placeholder="Category" id="category" type="text" />
-                <button onclick="filterText()">Search</button>
-            </div>
-        </div>
-        <div id="answer-box">
-
-        </div>
-
-
+    </br>
+    <div class="filters">
+        <input placeholder="Min Age" id="min-age" type="number" />
+        <input placeholder="Min Players" id="min-players" type="number" />
+        <input placeholder="Max Players" id="max-players" type="number" />
+        <input placeholder="Category" id="category" type="text" />
+        <button onclick="filterText()">Search</button>
     </div>
-    
-    
+        <div id="answer-box">
+        </div>
+    </div>
+
     <script>
+
         function answerBoxTemplate(name, description, average,id){
             return `<div class='search-result' onclick="window.location.href='/about/${id}'">
-            <p class='game-desc'>${id}</p>
             <h3 class='game-title'>${name}</h3>
             <p class='game-desc'>${description}</p>
             <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
         </div>`;
         }
 
-
         function sendFocus(){
             document.getElementById('filter-text-val').focus()
         }
-
 
         function filterText(){
             const titleValue = document.getElementById("filter-text-val").value;
@@ -76,7 +65,7 @@
             }).toString();
 
             document.getElementById("answer-box").innerHTML = ""
-            fetch("/episodes?" + queryParams)
+            fetch("/games?" + queryParams)
             .then((response) => response.json())
             .then((data) => {
                 const answerBox = document.getElementById("answer-box");
@@ -88,5 +77,6 @@
                 });
             });
         }
+            
     </script>
 </body>
