@@ -40,7 +40,8 @@ def home():
 @app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
-    return json_search(text)
+    search_results = json_search(text)
+    return render_template('episodes.html', query=text, results=search_results)
 
 if 'DB_NAME' not in os.environ:
     app.run(debug=True,host="0.0.0.0",port=5000)
