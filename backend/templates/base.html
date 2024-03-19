@@ -8,12 +8,6 @@
     <div class="full-body-container">
         <div class="top-text">
             <! -- issue here is that filters disappear when results come up, need to fix that-- >
-            <div class="filters">
-                <! -- min age max age filters input -- >
-                <input placeholder="Min Age" id="min-age" type="number" />
-                <input placeholder="Max Age" id="max-age" type="number" />
-                <button onclick="filterText()">Search</button>
-            </div>
             <div class="google-colors">
                 <h1 id="google-4">4</h1>
                 <h1 id="google-3">3</h1>
@@ -23,6 +17,14 @@
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
                 <input placeholder="Search for a Board Game" id="filter-text-val" onkeyup="filterText()">
+            </div>
+        </br>
+            <div class="filters">
+                <input placeholder="Min Age" id="min-age" type="number" />
+                <input placeholder="Min Players" id="min-players" type="number" />
+                <input placeholder="Max Players" id="max-players" type="number" />
+                <input placeholder="Category" id="category" type="text" />
+                <button onclick="filterText()">Search</button>
             </div>
         </div>
         <div id="answer-box">
@@ -48,13 +50,17 @@
 
         function filterText(){
             const titleValue = document.getElementById("filter-text-val").value;
-            const minAgeValue = document.getElementById("min-age").value;
-            const maxAgeValue = document.getElementById("max-age").value;
-            
+            const minAgeValue = document.getElementById("min-age").value || 0;
+            const minPlayersValue = document.getElementById("min-players").value || 0;
+            const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
+            const categoryValue = document.getElementById("category").value;
+
             const queryParams = new URLSearchParams({
                 title: titleValue,
                 min_age: minAgeValue,
-                max_age: maxAgeValue
+                min_players: minPlayersValue,
+                max_players: maxPlayersValue,
+                category: categoryValue
             }).toString();
 
             document.getElementById("answer-box").innerHTML = ""
@@ -68,8 +74,8 @@
                     tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average);
                     answerBox.appendChild(tempDiv);
                 });
-        });
-    }
+            });
+        }
             
     </script>
 </body>
