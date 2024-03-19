@@ -6,19 +6,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 <body>
     <div class="full-body-container">
-        <div class="top-text">
-            <!-- issue here is that filters disappear when results come up, need to fix that -->
-            <div class="google-colors">
-                <h1 id="google-4">4</h1>
-                <h1 id="google-3">3</h1>
-                <h1 id="google-0-1">0</h1>
-                <h1 id="google-0-2">0</h1>
+
+        <div class="overlay-container">
+            <div class="top-text">
+                Text
+                <form action="/episodes" method="get">
+                    <div class="input-box" onclick="sendFocus()">
+                        <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                        <input name="title" placeholder="Search for a Boardgame" id="filter-text-val">
+                    </div>
+                </form>
             </div>
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a Board Game" id="filter-text-val" onkeyup="filterText()">
+            <div class="sliding-row">
+                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
+                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
             </div>
-        </br>
+        </div>
+        <div id="answer-box"></div>
+
             <div class="filters">
                 <input placeholder="Min Age" id="min-age" type="number" />
                 <input placeholder="Min Players" id="min-players" type="number" />
@@ -31,10 +40,11 @@
 
         </div>
 
+
     </div>
-
+    
+    
     <script>
-
         function answerBoxTemplate(name, description, average,id){
             return `<div class='search-result' onclick="window.location.href='/about/${id}'">
             <p class='game-desc'>${id}</p>
@@ -44,9 +54,11 @@
         </div>`;
         }
 
+
         function sendFocus(){
             document.getElementById('filter-text-val').focus()
         }
+
 
         function filterText(){
             const titleValue = document.getElementById("filter-text-val").value;
@@ -76,6 +88,5 @@
                 });
             });
         }
-            
     </script>
 </body>
