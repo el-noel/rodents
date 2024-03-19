@@ -1,47 +1,56 @@
-import json
 import os
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
-
-# ROOT_PATH for linking with all your files. 
-# Feel free to use a config.py or settings.py with a global export variable
-os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
-
-# Get the directory of the current script
-current_directory = os.path.dirname(os.path.abspath(__file__))
-
-# Specify the path to the JSON file relative to the current script
-json_file_path = os.path.join(current_directory, 'init.json')
-
-# Assuming your JSON data is stored in a file named 'init.json'
-with open(json_file_path, 'r') as file:
-    data = json.load(file)
-    episodes_df = pd.DataFrame(data['episodes'])
-    reviews_df = pd.DataFrame(data['reviews'])
 
 app = Flask(__name__)
 CORS(app)
 
-# Sample search using json with pandas
-def json_search(query):
-    matches = []
-    merged_df = pd.merge(episodes_df, reviews_df, left_on='id', right_on='id', how='inner')
-    matches = merged_df[merged_df['title'].str.lower().str.contains(query.lower())]
-    matches_filtered = matches[['title', 'descr', 'imdb_rating']]
+# Load the CSV file into a dataframe
+csv_file_path = 'data/semicleanedbg.csv'
+data_df = pd.read_csv(csv_file_path)
+
+# Assuming your CSV has columns like 'title', 'description', and 'imdb_rating'
+# Adjust the column names as needed to match your CSV structure
+def csv_search(query, min_age, min_players, max_players, category):
+    matches = data_df[data_df['name'].str.lower().str.contains(query.lower())]
+    if min_age is not None:
+        matches = matches[matches['minage'] >= min_age]
+    if min_players is not None:
+        matches = matches[matches['minplayers'] >= min_players]
+    if max_players is not None:
+        matches = matches[matches['maxplayers'] <= max_players]
+    if category:  # If a category is provided, filter by itm
+        matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
+        
+    matches_filtered = matches[['name', 'description', 'average', 'objectid']]  # Update column names as necessary
     matches_filtered_json = matches_filtered.to_json(orient='records')
     return matches_filtered_json
 
 @app.route("/")
 def home():
-    return render_template('base.html',title="sample html")
+    return render_template('base.html', title="sample html")
 
 @app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
-    search_results = json_search(text)
-    return render_template('episodes.html', query=text, results=search_results)
+    min_age = request.args.get("min_age", type=int)
+    min_players = request.args.get("min_players", type=int)
+    max_players = request.args.get("max_players", type=int)
+    category = request.args.get("category")  # No type, because it's a string
+    return csv_search(text, min_age, min_players, max_players, category)
 
-if 'DB_NAME' not in os.environ:
-    app.run(debug=True,host="0.0.0.0",port=5000)
+@app.route("/about/<game_id>")
+def about(game_id):
+    game_id = int(game_id)
+    game_details_query = data_df[data_df['objectid'] == game_id]
+    # Check if the query returned any rows
+    if not game_details_query.empty:
+        game_details = game_details_query.iloc[0].to_dict()
+        return render_template('about.html', game=game_details)
+    else:
+        # If no rows are returned, handle the case (e.g., show a not found page or message)
+        return "Game not found", 404
+
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0", port=5000)
