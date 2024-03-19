@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ game.name }} - Game Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-details-container">
+        <h1>{{ game.name }}</h1>
+        <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
+        <p><strong>Description:</strong> {{game.description}}</p>
+        <p><strong>Average Rating:</strong> {{game.baverage}}</p>
+        <p><strong>Minimum Age:</strong> {{game.minage}} years</p>
+        <p><strong>Minimum Playtime:</strong> {{game.minplaytime}} minutes</p>
+        <!-- Add more game details here as needed -->
+        <a href="/">Back to Home</a>
+    </div>
+</body>
+</html>
