@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask, render_template, request
 from flask_cors import CORS
@@ -33,6 +34,8 @@ def csv_search(query, min_age, min_players, max_players, category):
 def home():
     return render_template('base.html', title="sample html")
 
+
+
 @app.route("/games")
 def search():
     text = request.args.get("title")
@@ -48,10 +51,14 @@ def search():
         results = csv_search(text, min_age, min_players, max_players, category)
         # episodes_search(text, min_age, min_players, max_players, category)
     
-    return results
+    results_json = csv_search(text, min_age, min_players, max_players, category)
+    results = json.loads(results_json)  # Convert JSON string back into a Python list
+    matches_filtered = results.copy()
 
-# def episodes_search(query, min_age, min_players, max_players, category):
-#     return csv_search(query, min_age, min_players, max_players, category)
+    matches_filtered.loc['name'] = matches_filtered['name'].apply(html.unescape)
+    matches_filtered.loc['description'] = matches_filtered['description'].apply(html.unescape)
+    return render_template('results.html', search_results=matches_filtered)
+
 
 def recommendation_search(query):
     # Placeholder for your recommendation search logic
@@ -67,6 +74,8 @@ def about(game_id):
         return render_template('about.html', game=game_details)
     else:
         return "Game not found", 404
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)

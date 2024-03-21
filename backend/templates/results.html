@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-details-container">
+        <h1>Search Results</h1>
+        {% if search_results %}
+            <ul>
+                {% for result in search_results %}
+                    <li>
+                        <h2>{{ result['name'] }}</h2>
+                        <p>{{ result['description'] }}</p>
+                        <p>Average Rating: {{ result['average'] }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

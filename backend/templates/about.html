@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
+    test
     <div class="game-details-container">
         <h1>{{ game.name }}</h1>
         <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
@@ -18,5 +19,49 @@
         <!-- Add more game details here as needed -->
         <a href="/">Back to Home</a>
     </div>
+    <script>
+
+        function answerBoxTemplate(name, description, average,id){
+            return `<div class='search-result' onclick="window.location.href='/about/${id}'">
+            <h3 class='game-title'>${name}</h3>
+            <p class='game-desc'>${description}</p>
+            <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
+        </div>`;
+        }
+
+        function sendFocus(){
+            document.getElementById('filter-text-val').focus()
+        }
+
+        function filterText(){
+            const titleValue = document.getElementById("filter-text-val").value;
+            const minAgeValue = document.getElementById("min-age").value || 0;
+            const minPlayersValue = document.getElementById("min-players").value || 0;
+            const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
+            const categoryValue = document.getElementById("category").value;
+
+            const queryParams = new URLSearchParams({
+                title: titleValue,
+                min_age: minAgeValue,
+                min_players: minPlayersValue,
+                max_players: maxPlayersValue,
+                category: categoryValue
+            }).toString();
+
+            document.getElementById("answer-box").innerHTML = ""
+            fetch("/games?" + queryParams)
+            .then((response) => response.json())
+            .then((data) => {
+                const answerBox = document.getElementById("answer-box");
+                answerBox.innerHTML = "";
+                data.forEach(row => {
+                    let tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid);
+                    answerBox.appendChild(tempDiv);
+                });
+            });
+        }
+            
+    </script>
 </body>
 </html>

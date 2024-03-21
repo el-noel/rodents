@@ -53,35 +53,35 @@
             document.getElementById('filter-text-val').focus()
         }
 
-        function filterText(){
+        function filterText() {
             const titleValue = document.getElementById("filter-text-val").value;
             const minAgeValue = document.getElementById("min-age").value || 0;
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
             const categoryValue = document.getElementById("category").value;
-            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';  // Capture toggle state
-
+            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';
+        
             const queryParams = new URLSearchParams({
                 title: titleValue,
                 min_age: minAgeValue,
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
                 category: categoryValue,
-                mode: recommendationMode  // Include mode in query
+                mode: recommendationMode
             }).toString();
-
-            document.getElementById("answer-box").innerHTML = ""
-            fetch("/games?" + queryParams)
-            .then((response) => response.json())
-            .then((data) => {
-                const answerBox = document.getElementById("answer-box");
-                answerBox.innerHTML = "";
-                data.forEach(row => {
-                    let tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid);
-                    answerBox.appendChild(tempDiv);
-                });
-            });
+        
+            fetch(`/games?${queryParams}`)
+                .then(response => response.json())
+                .then(data => {
+                    const answerBox = document.getElementById("answer-box");
+                    answerBox.innerHTML = ""; // Clear previous results
+                    data.forEach(game => {
+                        let div = document.createElement("div");
+                        div.innerHTML = answerBoxTemplate(game.name, game.description, game.average, game.objectid);
+                        answerBox.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
         }
             
     </script>
