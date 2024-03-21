@@ -13,6 +13,10 @@
                         <img src="{{ url_for('static', filename='images/mag.png') }}" />
                         <input name="title" placeholder="Search for a Boardgame" id="filter-text-val">
                     </div>
+                    <label for="toggleSearch">Recommendation Mode:</label> <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                      </label>
             </div>
             <div class="sliding-row">
                 <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
@@ -55,13 +59,15 @@
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
             const categoryValue = document.getElementById("category").value;
+            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';  // Capture toggle state
 
             const queryParams = new URLSearchParams({
                 title: titleValue,
                 min_age: minAgeValue,
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
-                category: categoryValue
+                category: categoryValue,
+                mode: recommendationMode  // Include mode in query
             }).toString();
 
             document.getElementById("answer-box").innerHTML = ""

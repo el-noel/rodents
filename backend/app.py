@@ -34,13 +34,29 @@ def home():
     return render_template('base.html', title="sample html")
 
 @app.route("/games")
-def episodes_search():
+def search():
     text = request.args.get("title")
     min_age = request.args.get("min_age", type=int)
     min_players = request.args.get("min_players", type=int)
     max_players = request.args.get("max_players", type=int)
     category = request.args.get("category")
-    return csv_search(text, min_age, min_players, max_players, category)
+    mode = request.args.get("mode")  # Added to capture the search mode
+
+    if mode == 'recommendation':
+        results = recommendation_search(text)
+    else:
+        results = csv_search(text, min_age, min_players, max_players, category)
+        # episodes_search(text, min_age, min_players, max_players, category)
+    
+    return results
+
+# def episodes_search(query, min_age, min_players, max_players, category):
+#     return csv_search(query, min_age, min_players, max_players, category)
+
+def recommendation_search(query):
+    # Placeholder for your recommendation search logic
+    # Return JSON data similar to episodes_search for consistency
+    pass
 
 @app.route("/about/<game_id>")
 def about(game_id):
