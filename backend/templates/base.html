@@ -4,6 +4,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+
 <body>
     <div class="full-body-container">
         <div class="overlay-container">
@@ -12,9 +13,11 @@
                     <div class="input-box" onclick="sendFocus()">
                         <img src="{{ url_for('static', filename='images/mag.png') }}" />
                         <input name="title" placeholder="Search for a Boardgame" id="filter-text-val">
+                        <div id="suggestionsBox" style="display: none;"></div>
+
                     </div>
                     <label for="toggleSearch">Recommendation Mode:</label> <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
             </div>
@@ -38,6 +41,54 @@
         <div id="answer-box">
         </div>
     </div>
+ 
+    <script>
+        function debounce(func, wait, immediate) {
+            let timeout;
+            return function() {
+                const context = this, args = arguments;
+                const later = function() {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                };
+                const callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func.apply(context, args);
+            };
+        }
+
+        //attempt at suggestion list
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('filter-text-val');
+            const suggestionsBox = document.getElementById('suggestionsBox');
+            const toggleMode = document.getElementById('toggleMode');
+        
+            searchInput.addEventListener('input', debounce(function() {
+                const query = searchInput.value.trim();
+                if (query && toggleMode.checked) {
+                    fetch(`/suggestions?query=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(suggestions => {
+                            suggestionsBox.innerHTML = '';
+                            suggestionsBox.style.display = 'block';
+                            suggestions.forEach(suggestion => {
+                                const suggestionElement = document.createElement('div');
+                                suggestionElement.textContent = suggestion;
+                                suggestionElement.addEventListener('click', () => {
+                                    searchInput.value = suggestion;
+                                    suggestionsBox.style.display = 'none';
+                                });
+                                suggestionsBox.appendChild(suggestionElement);
+                            });
+                        });
+                } else {
+                    suggestionsBox.style.display = 'none';
+                }
+            }, 250));
+        });
+        </script>
+        
 
     <script>
 
@@ -59,7 +110,7 @@
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
             const categoryValue = document.getElementById("category").value;
-            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';  // Capture toggle state
+            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';
 
             const queryParams = new URLSearchParams({
                 title: titleValue,
@@ -67,7 +118,7 @@
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
                 category: categoryValue,
-                mode: recommendationMode  // Include mode in query
+                mode: recommendationMode
             }).toString();
 
             document.getElementById("answer-box").innerHTML = ""

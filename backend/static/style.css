@@ -154,3 +154,13 @@ body, html {
     transform: translateX(26px);
   }
 
+  #suggestionsBox div {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+    #suggestionsBox div:hover {
+        background-color: #f0f0f0;
+}
+
+
