@@ -12,7 +12,6 @@
     flex-direction: column;
 }
 
-
 .input-box{
     border-radius: 50px;
     border:1px solid black;
@@ -40,11 +39,6 @@
     font-size: 16px;
     border: none;
     outline: 0;
-}
-
-#answer-box{
-    width: 700px;
-    margin-top:50px; 
 }
 
 .episode-title{
@@ -154,24 +148,18 @@ body, html {
     transform: translateX(26px);
   }
 
-  #suggestionsBox div {
-    cursor: pointer;
-    padding: 5px;
-    border-bottom: 1px solid #ccc;
-}
-    #suggestionsBox div:hover {
-        background-color: #f0f0f0;
-}
-#suggestionsBox {
-    display: none;
-    position: absolute;
-    max-height: 200px; 
-    overflow-y: auto;
-    background-color: white; 
-    width: 100%;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); 
-    z-index: 1; 
+#answer-box{
+    display: flex;
+    flex-wrap: wrap;
+    width: 700px;
+}  
+#answer-box div{
+    /* flex: 1 0 25%;  */
+    /* max-width: 25%;  */
+    box-sizing: border-box; 
+    padding: 10px;
 }
 
-
-
+#answer-box div .game-desc{
+    width: 70%;
+}
