@@ -4,6 +4,9 @@ from flask_cors import CORS
 import pandas as pd
 import html
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 app = Flask(__name__)
 CORS(app)
 
@@ -12,7 +15,13 @@ csv_file_path = 'data/semicleanedbg.csv'
 data_df = pd.read_csv(csv_file_path)
 
 
-def csv_search(query, min_age, min_players, max_players, category):
+# for cosine sim
+data_df['processed_description'] = data_df['description'].apply(lambda x: x.lower() if isinstance(x, str) else '')
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(data_df['processed_description'].values.astype('U'))  # 'U' for Unicode
+
+
+def basic_search(query, min_age, min_players, max_players, category):
     matches = data_df[data_df['name'].str.lower().str.contains(query.lower())]
     if min_age is not None:
         matches = matches[matches['minage'] >= min_age]
@@ -43,20 +52,48 @@ def search():
     mode = request.args.get("mode")  # Added to capture the search mode
 
     if mode == 'recommendation':
-        results = recommendation_search(text)
+        matches = recommendation_search(text)
     else:
-        results = csv_search(text, min_age, min_players, max_players, category)
-        # episodes_search(text, min_age, min_players, max_players, category)
-    
-    return results
+        matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
+        # basic_search(text, min_age, min_players, max_players, category)
 
-# def episodes_search(query, min_age, min_players, max_players, category):
-#     return csv_search(query, min_age, min_players, max_players, category)
+    if min_age is not None:
+        matches = matches[matches['minage'] >= min_age]
+    if min_players is not None:
+        matches = matches[matches['minplayers'] >= min_players]
+    if max_players is not None:
+        matches = matches[matches['maxplayers'] <= max_players]
+    if category:
+        matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
+    matches_filtered = matches[['name', 'description', 'average', 'objectid']] 
+    matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
+    matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
+    matches_filtered_json = matches_filtered.to_json(orient='records')
+
+    # Return only the relevant columns
+    return matches_filtered_json
 
 def recommendation_search(query):
-    # Placeholder for your recommendation search logic
-    # Return JSON data similar to episodes_search for consistency
-    pass
+    if query:
+        #some preprocessing: 1- fetch the game 2- get its processed desc
+        game_row = data_df[data_df['name'].str.lower() == query.lower()].iloc[0]
+        game_description = game_row['processed_description']
+
+        #cos sim
+        query_vector = tfidf_vectorizer.transform([game_description])
+        cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
+
+        #get the top 1000       
+        similar_indices = cosine_similarities.argsort()[-(1000+1):][::-1]
+    game_index = game_row.index[0]
+
+    # It's possible the game itself is the most similar one, so we exclude it if so.
+    similar_indices = similar_indices[1:]
+    
+    # Fetch the details of the top N similar games then return
+    similar_games = data_df.iloc[similar_indices]
+    return similar_games
+    
 
 @app.route("/about/<game_id>")
 def about(game_id):
