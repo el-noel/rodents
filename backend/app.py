@@ -115,13 +115,13 @@ def fetch_game_link(game_link):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         # img_tag = soup.find('meta', attrs={"property": "og:image", })
-        link_tag = soup.find_all('link', attrs={"rel": "preload", "as": "image"})
-        if link_tag:
-            return link_tag[1]['href']
+        link_tags = soup.find_all('link', attrs={"rel": "preload", "as": "image"})
+        if len(link_tags) > 1:
+            return link_tags[1]['href']
         else:
-            return "No <img> tag with the specified class found."
+            return link_tags[0]['href']
     else:
-        return f"Failed to retrieve the webpage. Status code: {response.status_code}"
+        return f"Cannot find image"
     
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
