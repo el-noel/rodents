@@ -61,7 +61,7 @@ def search():
         matches = matches[matches['maxplayers'] <= max_players]
     if category:
         matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-    matches_filtered = matches[['name', 'description', 'average', 'objectid']] 
+    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
