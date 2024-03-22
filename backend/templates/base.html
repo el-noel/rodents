@@ -8,14 +8,17 @@
 <body>
     <div class="full-body-container">
         <div class="overlay-container">
-            <div class="top-text">
-                Rodents
+            <div class="top-text flex-grid">
+                <div class="bold">
+                    Rodents
+                </div>
+                <div class="input-container" style="position: relative;">
                     <div class="input-box" onclick="sendFocus()">
                         <img src="{{ url_for('static', filename='images/mag.png') }}" />
                         <input name="title" placeholder="Search for a Boardgame" id="filter-text-val">
-                        <div id="suggestionsBox" style="display: none;"></div>
-
                     </div>
+                    <div id="suggestionsBox"></div>
+                </div>
                     <label for="toggleSearch">Recommendation Mode:</label> <label class="switch">
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
@@ -36,6 +39,15 @@
         <input placeholder="Min Players" id="min-players" type="number" />
         <input placeholder="Max Players" id="max-players" type="number" />
         <input placeholder="Category" id="category" type="text" />
+        <select id="category">
+            <option value="">Select a Category</option>
+            <option value="Strategy">Strategy</option>
+            <option value="Family">Family</option>
+            <option value="Card Game">Card Game</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Puzzle">Puzzle</option>
+            <!-- Add more categories as needed -->
+        </select>
         <button onclick="filterText()">Search</button>
     </div>
         <div id="answer-box">
