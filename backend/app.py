@@ -61,7 +61,7 @@ def search():
         matches = matches[matches['maxplayers'] <= max_players]
     if category:
         matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-    matches_filtered = matches[['name', 'description', 'average', 'objectid']] 
+    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
@@ -92,13 +92,8 @@ def about(game_id):
     game_details_query = data_df[data_df['objectid'] == game_id]
     if not game_details_query.empty:
         game_details = game_details_query.iloc[0].to_dict()
-        print("!!!! LOOK HERE !!!!")
-        print(game_details)
         # game_img = fetch_game_link(game_details_query["gamelink"])
-        print(game_id)
         game_img = fetch_game_link(game_details_query.reset_index(drop=True).at[0, "gamelink"])
-        print("!!!! LOOK HERE !!!!")
-        print(game_img)
         game_details["img"] = game_img
         return render_template('about.html', game=game_details)
     else:
@@ -122,6 +117,6 @@ def fetch_game_link(game_link):
             return link_tags[0]['href']
     else:
         return f"Cannot find image"
-    
+         
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
