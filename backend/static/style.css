@@ -149,8 +149,6 @@ body, html {
   }
 
 #answer-box{
-    display: flex;
-    flex-wrap: wrap;
     width: 700px;
 }  
 #answer-box div{
@@ -159,7 +157,7 @@ body, html {
     box-sizing: border-box; 
     padding: 10px;
 }
-
-#answer-box div .game-desc{
-    width: 70%;
+.client-info{
+    display: flex;
+    justify-content: space-between;
 }
