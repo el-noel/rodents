@@ -95,17 +95,15 @@ def about(game_id):
         # game_img = fetch_game_link(game_details_query["gamelink"])
         game_img = fetch_game_link(game_details_query.reset_index(drop=True).at[0, "gamelink"])
         game_details["img"] = game_img
+        game_reviews = fetch_game_reviews(game_details_query.reset_index(drop=True).at[0, "gamelink"])
+        game_details["reviews"] = game_reviews
         return render_template('about.html', game=game_details)
     else:
         return "Game not found", 404
     
 def fetch_game_link(game_link):
     # game_link = game_link[game_link.index("/"):]
-    print("!!!! LOOK HERE !!!!")
-    print(game_link)
     game_url = f"https://boardgamegeek.com{game_link}"
-    print("!!!! LOOK HERE !!!!")
-    print(game_link)
     response = requests.get(game_url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -117,6 +115,27 @@ def fetch_game_link(game_link):
             return link_tags[0]['href']
     else:
         return f"Cannot find image"
-         
+    
+def fetch_game_reviews(game_link):
+    game_url = f"https://boardgamegeek.com{game_link}/ratings"
+    print("Fetching reviews from:", game_url)
+    response = requests.get(game_url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        review_list_items = soup.find_all('li', class_="summary-item summary-rating-item ng-scope")
+        reviews = []
+        for item in review_list_items:
+            expandable_div = item.find('div', class_="expandable-body")
+            if expandable_div:
+                review_span = expandable_div.find('span', {"ng-bind-html": "::item.textfield.comment.rendered|to_trusted", "class": "ng-binding ng-scope"})
+                if review_span:
+                    review_text = review_span.get_text(strip=True)
+                    reviews.append(review_text)
+        print(f"Found {len(reviews)} reviews.")
+        return reviews
+    else:
+        print("Failed to fetch reviews.")
+        return []
+    
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
