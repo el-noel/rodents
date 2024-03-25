@@ -152,8 +152,6 @@ body, html {
     width: 700px;
 }  
 #answer-box div{
-    /* flex: 1 0 25%;  */
-    /* max-width: 25%;  */
     box-sizing: border-box; 
     padding: 10px;
 }
