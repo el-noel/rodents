@@ -73,6 +73,7 @@ def search():
     max_players = request.args.get("max_players", type=int)
     category = request.args.get("category")
     mode = request.args.get("mode")
+    filter_mode = request.args.get("filter_mode", 'relaxed')
 
     if mode == 'recommendation':
         cossim, sorted_games = recommendation_search(text)

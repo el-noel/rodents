@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - BoardGameFinder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+    <!-- Add additional stylesheets and scripts here -->
+</head>
+<body>
+    <div class="container">
+        <h1>Search Results</h1>
+        <div id="results">
+            {% for game in results %}
+            <div class="search-result">
+                <div class="game-image">
+                    <!-- Add image if you have one, using game.img or a placeholder -->
+                    <img src="{{ game.img or url_for('static', filename='images/placeholder.png') }}" alt="{{ game.name }}">
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">{{ game.name }}</h2>
+                    <p class="game-description">{{ game.description }}</p>
+                    <p class="game-rating">Average Rating: {{ game.average }}</p>
+                    <p class="game-similarity-score">Similarity Score: {{ '%.2f' % (game.similarity_score * 100) }}%</p> <!-- Display similarity score -->
+                    <p class="game-min-age">Min Age: {{ game.minage }}</p>
+                    <p class="game-min-players">Min Players: {{ game.minplayers }}</p>
+                    <p class="game-max-players">Max Players: {{ game.maxplayers }}</p>
+                    <p class="game-category">Category: {{ game.boardgamecategory }}</p>
+                    <a href="/about/{{ game.objectid }}" class="details-button">View Details</a>
+                </div>
+            </div>
+            {% else %}
+            <p>No games found matching your criteria.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add any additional scripts here -->
+    <!-- Back to Search button -->
+    <div class="back-button-container">
+        <a href="/" class="back-button">Back to Search</a>
+    </div>
+
+</body>
+</html>

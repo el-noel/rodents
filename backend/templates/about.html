@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="about-page">
     <div class="game-details-container">
         <div class="game-image-div"><img src={{game.img}}></img></div>
         <div class="game-information">
@@ -15,6 +15,9 @@
             <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
             <p><strong>Description:</strong> {{game.description}}</p>
             <p><strong>Average Rating:</strong> {{game.baverage}}</p>
+            {% if similarity_score %}
+            <p class="game-similarity-score">Similarity Score: {{ '%.2f' | format(similarity_score * 100) }}%</p>
+            {% endif %}
             <p><strong>Minimum Age:</strong> {{game.minage}} years</p>
             <p><strong>Minimum Playtime:</strong> {{game.minplaytime}} minutes</p>
             <p><strong>Reviews:</strong> {{game.reviews}}</p>
