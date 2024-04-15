@@ -42,6 +42,15 @@
                             <option value="Puzzle">Puzzle</option>
                             <!-- Add more categories as needed -->
                         </select>
+                        <select id="sort-by">
+                            <option value="">Sort by</option>
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="age_asc">Min Age (Ascending)</option>
+                            <option value="age_desc">Min Age (Descending)</option>
+                            <option value="rating_asc">Rating (Low to High)</option>
+                            <option value="rating_desc">Rating (High to Low)</option>
+                        </select>
                         <button onclick="filterText()">Search</button>
                     </div>
                     <label for="toggleSearch">Want to find a game similar to another title? Try recommendation mode:</label> <label class="switch">
@@ -52,7 +61,7 @@
         </div>
         
     </br>
-    
+
         <div id="answer-box">
         </div>
     </div>
@@ -142,14 +151,15 @@
             document.getElementById('filter-text-val').focus()
         }
 
-        function filterText(){
+        function filterText() {
             const titleValue = document.getElementById("filter-text-val").value;
             const minAgeValue = document.getElementById("min-age").value || 0;
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
             const categoryValue = document.getElementById("category").value;
-            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';
-
+            const sortBy = document.getElementById("sort-by").value;
+            const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
+        
             const queryParams = new URLSearchParams({
                 title: titleValue,
                 min_age: minAgeValue,
@@ -158,11 +168,23 @@
                 category: categoryValue,
                 mode: recommendationMode
             }).toString();
-
-            document.getElementById("answer-box").innerHTML = ""
+        
+            document.getElementById("answer-box").innerHTML = "";
             fetch("/games?" + queryParams)
-            .then((response) => response.json())
-            .then((data) => {
+            .then(response => response.json())
+            .then(data => {
+                data.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'name_asc': return a.name.localeCompare(b.name);
+                        case 'name_desc': return b.name.localeCompare(a.name);
+                        case 'age_asc': return a.minage - b.minage;
+                        case 'age_desc': return b.minage - a.minage;
+                        case 'rating_asc': return a.average - b.average;
+                        case 'rating_desc': return b.average - a.average;
+                        default: return 0;
+                    }
+                });
+        
                 const answerBox = document.getElementById("answer-box");
                 answerBox.innerHTML = "";
                 data.forEach(row => {
@@ -170,8 +192,19 @@
                     tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory);
                     answerBox.appendChild(tempDiv);
                 });
-            });
+            })
         }
-            
+        
+
+        function toggleInfoPopup() {
+            var popup = document.getElementById("infoPopup");
+            if (popup.style.display === "none") {
+                popup.style.display = "block";
+            } else {
+                popup.style.display = "none";
+            }
+    }
+
+
     </script>
 </body>
