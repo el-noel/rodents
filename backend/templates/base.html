@@ -7,7 +7,16 @@
 
 <body>
     <div class="full-body-container">
+        
         <div class="overlay-container">
+            <div class="sliding-row">
+                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
+                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
+            </div>
             <div class="top-text flex-grid">
                 <div class="bold">
                     Game Seeker
@@ -19,36 +28,31 @@
                     </div>
                     <div id="suggestionsBox"></div>
                 </div>
-                    <label for="toggleSearch">Recommendation Mode:</label> <label class="switch">
+                    
+                      <div class="filters">
+                        <input placeholder="Min Age" id="min-age" type="number" min="1"/>
+                        <input placeholder="Min Players" id="min-players" type="number" min="1" />
+                        <input placeholder="Max Players" id="max-players" type="number" min="1"/>
+                        <select id="category">
+                            <option value="">Select a Category</option>
+                            <option value="Strategy">Strategy</option>
+                            <option value="Family">Family</option>
+                            <option value="Card Game">Card Game</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Puzzle">Puzzle</option>
+                            <!-- Add more categories as needed -->
+                        </select>
+                        <button onclick="filterText()">Search</button>
+                    </div>
+                    <label for="toggleSearch">Want to find a game similar to another title? Try recommendation mode:</label> <label class="switch">
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
-            </div>
-            <div class="sliding-row">
-                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
-                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
-            </div>
+                    </div>
         </div>
+        
     </br>
-    <div class="filters">
-        <input placeholder="Min Age" id="min-age" type="number" />
-        <input placeholder="Min Players" id="min-players" type="number" />
-        <input placeholder="Max Players" id="max-players" type="number" />
-        <select id="category">
-            <option value="">Select a Category</option>
-            <option value="Strategy">Strategy</option>
-            <option value="Family">Family</option>
-            <option value="Card Game">Card Game</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Puzzle">Puzzle</option>
-            <!-- Add more categories as needed -->
-        </select>
-        <button onclick="filterText()">Search</button>
-    </div>
+    
         <div id="answer-box">
         </div>
     </div>
