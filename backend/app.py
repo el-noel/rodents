@@ -42,41 +42,26 @@ def suggestions():
 @app.route("/games")
 def search():
     text = request.args.get("title")
-    exclude = request.args.get("exclude")  # New exclude parameter
     min_age = request.args.get("min_age", type=int)
     min_players = request.args.get("min_players", type=int)
     max_players = request.args.get("max_players", type=int)
     category = request.args.get("category")
     mode = request.args.get("mode")
-    filter_mode = request.args.get("filter_mode", 'relaxed')
 
     if mode == 'recommendation':
         matches = recommendation_search(text)
-        
     else:
         matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
-        if exclude:
-            exclude_terms = exclude.split(",")
-            for term in exclude_terms:
-                matches = matches[~matches['description'].str.lower().str.contains(term.strip().lower())]
-        matches['similarity_score'] = 0
-    if filter_mode == 'strict':
-        if min_age is not None:
-            matches = matches[matches['minage'] >= min_age]
-        if min_players is not None:
-            matches = matches[matches['minplayers'] >= min_players]
-        if max_players is not None:
-            matches = matches[matches['maxplayers'] <= max_players]
-        if category:
-            matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-    else:
-        if min_age is not None:
-            matches = matches[matches['minage'] >= (min_age - 3)]
-        if max_players is not None:
-            matches = matches[(matches['maxplayers'] <= (max_players + 3)) | (matches['maxplayers'] <= max_players)]
-        if category:
-            matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
+
+    if min_age is not None:
+        matches = matches[matches['minage'] >= min_age]
+    if min_players is not None:
+        matches = matches[matches['minplayers'] >= min_players]
+    if max_players is not None:
+        matches = matches[matches['maxplayers'] <= max_players]
+    if category:
+        matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
+    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
@@ -94,14 +79,11 @@ def recommendation_search(query):
         #get the top 1000       
         similar_indices = cosine_similarities.argsort()[-(1000+1):][::-1]
     # game itself is the most similar one, so we exclude it if so.
-        similar_indices = similar_indices[1:]
+    similar_indices = similar_indices[1:]
 
     # Fetch the details of the top N similar games then return
-        similar_games = data_df.iloc[similar_indices]
-        similar_games['similarity_score'] = cosine_similarities[similar_indices]
-        return similar_games
-    else:
-        return pd.DataFrame()
+    similar_games = data_df.iloc[similar_indices]
+    return similar_games
     
 
 @app.route("/about/<game_id>")
