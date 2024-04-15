@@ -42,6 +42,7 @@ def suggestions():
 @app.route("/games")
 def search():
     text = request.args.get("title")
+    exclude = request.args.get("exclude")  # New exclude parameter
     min_age = request.args.get("min_age", type=int)
     min_players = request.args.get("min_players", type=int)
     max_players = request.args.get("max_players", type=int)
@@ -53,6 +54,11 @@ def search():
         
     else:
         matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
+        if exclude:
+            exclude_terms = exclude.split(",")
+            for term in exclude_terms:
+                matches = matches[~matches['description'].str.lower().str.contains(term.strip().lower())]
+        matches['similarity_score'] = 0
     if min_age is not None:
         matches = matches[matches['minage'] >= min_age]
     if min_players is not None:

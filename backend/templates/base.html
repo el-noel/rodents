@@ -35,6 +35,7 @@
         </div>
     </br>
     <div class="filters">
+        <input placeholder="Exclude Keywords" id="exclude-keywords" type="text" />
         <input placeholder="Min Age" id="min-age" type="number" />
         <input placeholder="Min Players" id="min-players" type="number" />
         <input placeholder="Max Players" id="max-players" type="number" />
@@ -144,6 +145,7 @@
 
         function filterText(){
             const titleValue = document.getElementById("filter-text-val").value;
+            const excludeValue = document.getElementById("exclude-keywords").value;  // New exclude field
             const minAgeValue = document.getElementById("min-age").value || 0;
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
@@ -152,6 +154,7 @@
 
             const queryParams = new URLSearchParams({
                 title: titleValue,
+                exclude: excludeValue,
                 min_age: minAgeValue,
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
