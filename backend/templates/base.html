@@ -57,6 +57,15 @@
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
+                      <label for="filterMode">Filtering Mode <span id="infoButton" onclick="toggleInfoPopup()" style="cursor:pointer;">ℹ️</span>
+                        <div id="infoPopup" class="info-popup" style="display:none;">
+                          <span onclick="toggleInfoPopup()" class="close-info">&times;</span>
+                          <p>This toggle switches between <strong>'Strict'</strong> and <strong>'Relaxed'</strong> filtering modes. 
+                          'Strict' mode will only include results that match all criteria exactly. 'Relaxed' mode includes results that are close matches to the criteria.</p>
+                        </div>:</label> <label class="switch">
+                        <input type="checkbox" id="filterMode">
+                        <span class="slider"></span>
+                    </label>
                     </div>
         </div>
         
@@ -124,6 +133,7 @@
                 categoriesList += `<li>${categoriesArray[i].trim()}</li>`; 
             }
             categoriesList += '</ul>';
+            let similarityInfo = `<p class='similarity-score'>Similarity: ${similarityScore ? (similarityScore * 100).toFixed(2) + '%' : 'Not available'}</p>`;
 
            // let minAgeCheck = parseInt(min_age, 10) >= parseInt(currentMinAge, 10) ? '✔️' : '❌';
            // let minPlayersCheck = parseInt(min_players, 10) >= parseInt(currentMinPlayers, 10) ? '✔️' : '❌';
@@ -136,6 +146,7 @@
             <div class='game-info'>
             <h3 class='game-title'>${name}</h3>
             <p class='game-desc'>${twosent}</p>
+            <p class='sim-score'>${similarityInfo}</p>
             <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
             </div>
             <div class='client-info'>
@@ -143,6 +154,7 @@
                 <p class='filters'>Min Players: ${min_players}</p>
                 <p class='filters'>Max Players: ${max_players}</p>
                 <p class='filters'>${categoriesList}</p>
+                <p class='similarity-score'>${similarityInfo}</p>
             <div>
         </div>`;
         }
@@ -159,6 +171,7 @@
             const categoryValue = document.getElementById("category").value;
             const sortBy = document.getElementById("sort-by").value;
             const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
+            const filterMode = document.getElementById("filterMode").checked ? 'strict' : 'relaxed';
         
             const queryParams = new URLSearchParams({
                 title: titleValue,
@@ -166,7 +179,8 @@
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
                 category: categoryValue,
-                mode: recommendationMode
+                mode: recommendationMode,
+                filter_mode: filterMode
             }).toString();
         
             document.getElementById("answer-box").innerHTML = "";
@@ -189,7 +203,7 @@
                 answerBox.innerHTML = "";
                 data.forEach(row => {
                     let tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory);
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory, row.similarity_score);
                     answerBox.appendChild(tempDiv);
                 });
             })
