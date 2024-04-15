@@ -57,10 +57,46 @@
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
+                    
+                    <label for="filterMode">Filtering Mode <span id="infoButton" onclick="toggleInfoPopup()" style="cursor:pointer;">ℹ️</span>
+                        <div id="infoPopup" class="info-popup" style="display:none;">
+                          <span onclick="toggleInfoPopup()" class="close-info">&times;</span>
+                          <p>This toggle switches between <strong>'Strict'</strong> and <strong>'Relaxed'</strong> filtering modes. 
+                          'Strict' mode will only include results that match all criteria exactly. 'Relaxed' mode includes results that are close matches to the criteria.</p>
+                        </div>:</label> <label class="switch">
+                        <input type="checkbox" id="filterMode">
+                        <span class="slider"></span>
+                    </label>
+            </div>
+            <div class="sliding-row">
+                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
+                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
+            </div>
                     </div>
         </div>
         
     </br>
+
+    <div class="filters">
+        <input placeholder="Exclude Keywords" id="exclude-keywords" type="text" />
+        <input placeholder="Min Age" id="min-age" type="number" />
+        <input placeholder="Min Players" id="min-players" type="number" />
+        <input placeholder="Max Players" id="max-players" type="number" />
+        <select id="category">
+            <option value="">Select a Category</option>
+            <option value="Strategy">Strategy</option>
+            <option value="Family">Family</option>
+            <option value="Card Game">Card Game</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Puzzle">Puzzle</option>
+            <!-- Add more categories as needed -->
+        </select>
+        <button onclick="filterText()">Search</button>
+    </div>
 
         <div id="answer-box">
         </div>
@@ -116,7 +152,7 @@
 
     <script>
 
-        function answerBoxTemplate(name, description, average,id, min_age, min_players, max_players, category){
+        function answerBoxTemplate(name, description, average,id, min_age, min_players, max_players, category, similarityScore=null){
             let twosent = description.split('.').slice(0, 2).join('.') + '.';
             let categoriesArray = category.split(','); 
             let categoriesList = '<ul> Category:';
@@ -124,6 +160,7 @@
                 categoriesList += `<li>${categoriesArray[i].trim()}</li>`; 
             }
             categoriesList += '</ul>';
+            let similarityInfo = `<p class='similarity-score'>Similarity: ${similarityScore ? (similarityScore * 100).toFixed(2) + '%' : 'Not available'}</p>`;
 
            // let minAgeCheck = parseInt(min_age, 10) >= parseInt(currentMinAge, 10) ? '✔️' : '❌';
            // let minPlayersCheck = parseInt(min_players, 10) >= parseInt(currentMinPlayers, 10) ? '✔️' : '❌';
@@ -136,6 +173,8 @@
             <div class='game-info'>
             <h3 class='game-title'>${name}</h3>
             <p class='game-desc'>${twosent}</p>
+            <p class='sim-score'>${similarityInfo}</p>
+            
             <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
             </div>
             <div class='client-info'>
@@ -143,6 +182,7 @@
                 <p class='filters'>Min Players: ${min_players}</p>
                 <p class='filters'>Max Players: ${max_players}</p>
                 <p class='filters'>${categoriesList}</p>
+                <p class='similarity-score'>${similarityInfo}</p>
             <div>
         </div>`;
         }
@@ -153,20 +193,26 @@
 
         function filterText() {
             const titleValue = document.getElementById("filter-text-val").value;
+            const excludeValue = document.getElementById("exclude-keywords").value;  // New exclude field
             const minAgeValue = document.getElementById("min-age").value || 0;
             const minPlayersValue = document.getElementById("min-players").value || 0;
             const maxPlayersValue = document.getElementById("max-players").value || Number.MAX_SAFE_INTEGER;
             const categoryValue = document.getElementById("category").value;
+            const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';
+            const filterMode = document.getElementById("filterMode").checked ? 'strict' : 'relaxed';
+
             const sortBy = document.getElementById("sort-by").value;
             const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
         
             const queryParams = new URLSearchParams({
                 title: titleValue,
+                exclude: excludeValue,
                 min_age: minAgeValue,
                 min_players: minPlayersValue,
                 max_players: maxPlayersValue,
                 category: categoryValue,
-                mode: recommendationMode
+                mode: recommendationMode,
+                filter_mode: filterMode
             }).toString();
         
             document.getElementById("answer-box").innerHTML = "";
@@ -189,12 +235,11 @@
                 answerBox.innerHTML = "";
                 data.forEach(row => {
                     let tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory);
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory, row.similarity_score);
                     answerBox.appendChild(tempDiv);
                 });
             })
         }
-        
 
         function toggleInfoPopup() {
             var popup = document.getElementById("infoPopup");
@@ -203,8 +248,11 @@
             } else {
                 popup.style.display = "none";
             }
-    }
 
+}
+            
+
+    }
 
     </script>
 </body>
