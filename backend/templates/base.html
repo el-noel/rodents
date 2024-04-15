@@ -23,7 +23,13 @@
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
-                    <label for="filterMode">Filtering Mode:</label> <label class="switch">
+                    
+                    <label for="filterMode">Filtering Mode <span id="infoButton" onclick="toggleInfoPopup()" style="cursor:pointer;">ℹ️</span>
+                        <div id="infoPopup" class="info-popup" style="display:none;">
+                          <span onclick="toggleInfoPopup()" class="close-info">&times;</span>
+                          <p>This toggle switches between <strong>'Strict'</strong> and <strong>'Relaxed'</strong> filtering modes. 
+                          'Strict' mode will only include results that match all criteria exactly. 'Relaxed' mode includes results that are close matches to the criteria.</p>
+                        </div>:</label> <label class="switch">
                         <input type="checkbox" id="filterMode">
                         <span class="slider"></span>
                     </label>
@@ -181,6 +187,14 @@
                 });
             });
         }
+        function toggleInfoPopup() {
+            var popup = document.getElementById("infoPopup");
+            if (popup.style.display === "none") {
+                popup.style.display = "block";
+            } else {
+                popup.style.display = "none";
+            }
+}
             
     </script>
 </body>
