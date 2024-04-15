@@ -9,16 +9,18 @@
 </head>
 <body>
     <div class="game-details-container">
-        <h1>{{ game.name }}</h1>
-        <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
-        <p><strong>Description:</strong> {{game.description}}</p>
-        <img src={{game.img}}></img>
-        <p><strong>Average Rating:</strong> {{game.baverage}}</p>
-        <p><strong>Minimum Age:</strong> {{game.minage}} years</p>
-        <p><strong>Minimum Playtime:</strong> {{game.minplaytime}} minutes</p>
-        <p><strong>Reviews:</strong> {{game.reviews}}</p>
-        <!-- Add more game details here as needed -->
-        <a href="/">Back to Home</a>
+        <div class="game-image-div"><img src={{game.img}}></img></div>
+        <div class="game-infomation">
+            <h1>{{ game.name }}</h1>
+            <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
+            <p><strong>Description:</strong> {{game.description}}</p>
+            <p><strong>Average Rating:</strong> {{game.baverage}}</p>
+            <p><strong>Minimum Age:</strong> {{game.minage}} years</p>
+            <p><strong>Minimum Playtime:</strong> {{game.minplaytime}} minutes</p>
+            <p><strong>Reviews:</strong> {{game.reviews}}</p>
+            <!-- Add more game details here as needed -->
+            <a href="/">Back to Home</a>
+        </div>
     </div>
 </body>
 </html>

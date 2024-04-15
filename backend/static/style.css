@@ -1,3 +1,14 @@
+
+@import url(https://fonts.googleapis.com/css?family=Lato:400,900);
+@keyframes pan {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 100% 0%;
+    }
+  }
+
 .full-body-container{
     position: absolute;
     top:0;
@@ -11,9 +22,12 @@
     align-items: center;
     flex-direction: column;
 }
-
+div.filters input, div.filters select{
+    border-radius: 100px;
+    padding:12px;
+}
 .input-box{
-    border-radius: 50px;
+    border-radius: 100px;
     border:1px solid black;
     display: flex;
     align-items: center;
@@ -41,25 +55,31 @@
     outline: 0;
 }
 
-.episode-title{
-    font-family: 'Kanit', sans-serif;
-}
-
-.episode-desc{
-    font-family: 'Montserrat', sans-serif;
-}
-
 body, html {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-color: white;
+    background-color: #BBC2E2;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='157' height='157' viewBox='0 0 20 20'%3E%3Cg %3E%3Cpolygon fill='%23B7B5E4' points='20 10 10 0 0 0 20 20'/%3E%3Cpolygon fill='%23B7B5E4' points='0 10 0 20 10 20'/%3E%3C/g%3E%3C/svg%3E");
+    animation: pan 180s linear infinite;
 }
-
+/* Text stuff*/
+.bold{
+    font-family: 'Lato', sans-serif;
+    font-size: 3em;
+    font-weight: 900; 
+}
+.game-info, .client-info, label {
+    font-family: 'Lato', sans-serif;   
+}
+.search-result{
+    background-color: white;
+    background: white;
+    border-radius: 25px;
+    border: solid;
+}
 .sliding-row {
     display: flex;
-    /* width: calc(100px * 10); */
-    animation: slide 20s linear infinite forwards;
 }
 
 .boardgame {
@@ -120,6 +140,7 @@ body, html {
     background-color: #ccc;
     -webkit-transition: .4s;
     transition: .4s;
+    border-radius: 100px;
   }
   
   .slider:before {
@@ -132,6 +153,7 @@ body, html {
     background-color: white;
     -webkit-transition: .4s;
     transition: .4s;
+    border-radius: 100px;
   }
   
   input:checked + .slider {
@@ -149,7 +171,7 @@ body, html {
   }
 
 #answer-box{
-    width: 700px;
+    width: 800px;
 }  
 #answer-box div{
     box-sizing: border-box; 
@@ -158,4 +180,12 @@ body, html {
 .client-info{
     display: flex;
     justify-content: space-between;
+}
+
+/*About.html*/
+.game-details-container{
+    font-family: 'Lato', sans-serif;
+    background: white;
+    border-radius: 25px;
+    display: flex;
 }
