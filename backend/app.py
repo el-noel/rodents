@@ -55,11 +55,8 @@ def search():
         
     else:
         matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
-        if exclude:
-            exclude_terms = exclude.split(",")
-            for term in exclude_terms:
-                matches = matches[~matches['description'].str.lower().str.contains(term.strip().lower())]
         matches['similarity_score'] = 0
+
     if filter_mode == 'strict':
         if min_age is not None:
             matches = matches[matches['minage'] >= min_age]
@@ -97,11 +94,9 @@ def recommendation_search(query):
         similar_indices = similar_indices[1:]
 
     # Fetch the details of the top N similar games then return
-        similar_games = data_df.iloc[similar_indices]
-        similar_games['similarity_score'] = cosine_similarities[similar_indices]
-        return similar_games
-    else:
-        return pd.DataFrame()
+    similar_games = data_df.iloc[similar_indices]
+    similar_games['similarity_score'] = cosine_similarities[similar_indices]
+    return similar_games
     
 
 @app.route("/about/<game_id>")

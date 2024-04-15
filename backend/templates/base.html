@@ -57,26 +57,12 @@
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
-                    
-                    <label for="filterMode">Filtering Mode <span id="infoButton" onclick="toggleInfoPopup()" style="cursor:pointer;">ℹ️</span>
-                        <div id="infoPopup" class="info-popup" style="display:none;">
-                          <span onclick="toggleInfoPopup()" class="close-info">&times;</span>
-                          <p>This toggle switches between <strong>'Strict'</strong> and <strong>'Relaxed'</strong> filtering modes. 
-                          'Strict' mode will only include results that match all criteria exactly. 'Relaxed' mode includes results that are close matches to the criteria.</p>
-                        </div>:</label> <label class="switch">
+                      <label for="filterMode">Filtering Mode:</label> <label class="switch">
                         <input type="checkbox" id="filterMode">
                         <span class="slider"></span>
                     </label>
-            </div>
-            <div class="sliding-row">
-                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
-                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
-                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
-            </div>
                     </div>
+                    
         </div>
         
     </br>
@@ -174,7 +160,6 @@
             <h3 class='game-title'>${name}</h3>
             <p class='game-desc'>${twosent}</p>
             <p class='sim-score'>${similarityInfo}</p>
-            
             <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
             </div>
             <div class='client-info'>
@@ -203,6 +188,7 @@
 
             const sortBy = document.getElementById("sort-by").value;
             const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
+            const filterMode = document.getElementById("filterMode").checked ? 'strict' : 'relaxed';
         
             const queryParams = new URLSearchParams({
                 title: titleValue,
@@ -213,6 +199,7 @@
                 category: categoryValue,
                 mode: recommendationMode,
                 filter_mode: filterMode
+                
             }).toString();
         
             document.getElementById("answer-box").innerHTML = "";
