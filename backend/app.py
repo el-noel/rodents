@@ -5,6 +5,9 @@ import pandas as pd
 import html
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.decomposition import TruncatedSVD
+
+
 
 
 import requests
@@ -21,7 +24,9 @@ data_df['processed_description'] = data_df['description'].apply(lambda x: x.lowe
 tfidf_vectorizer = TfidfVectorizer()
 tfidf_matrix = tfidf_vectorizer.fit_transform(data_df['processed_description'].values.astype('U'))  # 'U' for Unicode
 
-
+#for SVD
+svd_model = TruncatedSVD(n_components=100)
+svd_matrix = svd_model.fit_transform(tfidf_matrix)
 
 @app.route("/")
 def home():
@@ -38,6 +43,27 @@ def suggestions():
     suggestions = matching_games[:5]
     return jsonify(suggestions)
 
+def makeWeightVectors(weight_mat, mode, min_age, min_players, max_players, category, text, data):
+    if mode == 'recommendation':
+        weight_mat['title_weight'] = data['name'].str.lower().apply(lambda x: 0.5 if text in x else 1.0)
+    else:
+        weight_mat['title_weight'] = data['name'].str.lower().apply(lambda x: 1.2 if text in x else 1.0)
+
+    weight_mat['age_weight'] = 1.0
+    weight_mat['players_weight'] = 1.0
+    weight_mat['category_weight'] = 1.0
+
+    # Conditionally adjust weights if the game meets the criteria
+    if min_age:
+        weight_mat['age_weight'] = data['minage'].apply(lambda x: 1.2 if x >= min_age else 1.0)
+    if min_players:
+        weight_mat['players_weight'] = data['minplayers'].apply(lambda x: 1.2 if x >= min_players else 1.0)
+    if max_players:
+        weight_mat['players_weight'] = data['maxplayers'].apply(lambda x: 1.2 if x <= max_players else weight_mat['players_weight'])  # Maintain previous weight if already applied
+    if category:
+        weight_mat['category_weight'] = data['boardgamecategory'].str.contains(category, case=False, na=False).replace({True: 1.2, False: 1.0})
+
+    return weight_mat
 
 @app.route("/games")
 def search():
@@ -49,10 +75,25 @@ def search():
     mode = request.args.get("mode")
 
     if mode == 'recommendation':
-        matches = recommendation_search(text)
+        cossim, sorted_games = recommendation_search(text)
     else:
-        matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
+        cossim, sorted_games = description_search(text)
+ 
+    similarity_scores = pd.DataFrame(cossim, columns=['similarity'], index=sorted_games.index)
+    similarity_scores = makeWeightVectors(similarity_scores, mode, min_age, min_players, max_players, category, text, sorted_games)
 
+    similarity_scores['total_weight'] = (
+        similarity_scores['similarity'] *
+        similarity_scores['title_weight'] *
+        similarity_scores['age_weight'] *
+        similarity_scores['players_weight'] *
+        similarity_scores['category_weight']
+    )
+    similarity_scores["total_similarity"] = similarity_scores['similarity'] * similarity_scores['total_weight']
+    topWeightedResults = similarity_scores['total_similarity'].argsort()[::-1][:1000]
+
+    matches = data_df.loc[topWeightedResults]
+#left for strict filtering
     if min_age is not None:
         matches = matches[matches['minage'] >= min_age]
     if min_players is not None:
@@ -61,6 +102,7 @@ def search():
         matches = matches[matches['maxplayers'] <= max_players]
     if category:
         matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
+
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
@@ -68,22 +110,29 @@ def search():
 
     return matches_filtered_json
 
+
+##The different search metrics to get basic results
+def description_search(query):
+    if query:
+        query_vector = tfidf_vectorizer.transform([query])
+        query_svd = svd_model.transform(query_vector)
+        cosine_similarities = cosine_similarity(query_svd, svd_matrix).flatten()     
+        similar_indices = cosine_similarities.argsort()[::-1]
+        # [-(1000+1):] 
+        return cosine_similarities, data_df.iloc[similar_indices]
+
+#not filtering out same game now for some reason UGH
 def recommendation_search(query):
     if query:
-        #some preprocessing: 1- fetch the game 2- get its processed desc
-        game_row = data_df[data_df['name'].str.lower() == query.lower()].iloc[0]
+        game_index = data_df[data_df['name'].str.lower() == query.lower()].index[0]
+        game_row = data_df.loc[game_index]
         game_description = game_row['processed_description']
-        #cos sim
         query_vector = tfidf_vectorizer.transform([game_description])
-        cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
-        #get the top 1000       
-        similar_indices = cosine_similarities.argsort()[-(1000+1):][::-1]
-    # game itself is the most similar one, so we exclude it if so.
-    similar_indices = similar_indices[1:]
-
-    # Fetch the details of the top N similar games then return
-    similar_games = data_df.iloc[similar_indices]
-    return similar_games
+        cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()   
+        cosine_similarities[game_index] = "-inf"
+        similar_indices = cosine_similarities.argsort()[::-1]
+        similar_games = data_df.iloc[similar_indices] 
+    return cosine_similarities, similar_games
     
 
 @app.route("/about/<game_id>")
