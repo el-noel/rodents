@@ -50,9 +50,9 @@ def search():
 
     if mode == 'recommendation':
         matches = recommendation_search(text)
+        
     else:
         matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
-
     if min_age is not None:
         matches = matches[matches['minage'] >= min_age]
     if min_players is not None:
@@ -61,7 +61,7 @@ def search():
         matches = matches[matches['maxplayers'] <= max_players]
     if category:
         matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
+    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
@@ -79,11 +79,14 @@ def recommendation_search(query):
         #get the top 1000       
         similar_indices = cosine_similarities.argsort()[-(1000+1):][::-1]
     # game itself is the most similar one, so we exclude it if so.
-    similar_indices = similar_indices[1:]
+        similar_indices = similar_indices[1:]
 
     # Fetch the details of the top N similar games then return
-    similar_games = data_df.iloc[similar_indices]
-    return similar_games
+        similar_games = data_df.iloc[similar_indices]
+        similar_games['similarity_score'] = cosine_similarities[similar_indices]
+        return similar_games
+    else:
+        return pd.DataFrame()
     
 
 @app.route("/about/<game_id>")
@@ -97,6 +100,7 @@ def about(game_id):
         game_details["img"] = game_img
         game_reviews = fetch_game_reviews(game_details_query.reset_index(drop=True).at[0, "gamelink"])
         game_details["reviews"] = game_reviews
+
         return render_template('about.html', game=game_details)
     else:
         return "Game not found", 404
