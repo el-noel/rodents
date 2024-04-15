@@ -42,7 +42,6 @@ def suggestions():
 @app.route("/games")
 def search():
     text = request.args.get("title")
-    exclude = request.args.get("exclude")  # New exclude parameter
     min_age = request.args.get("min_age", type=int)
     min_players = request.args.get("min_players", type=int)
     max_players = request.args.get("max_players", type=int)
@@ -52,7 +51,6 @@ def search():
 
     if mode == 'recommendation':
         matches = recommendation_search(text)
-        
     else:
         matches = matches = data_df[data_df['name'].str.lower().str.contains(text.lower())]
         matches['similarity_score'] = 0
@@ -91,7 +89,7 @@ def recommendation_search(query):
         #get the top 1000       
         similar_indices = cosine_similarities.argsort()[-(1000+1):][::-1]
     # game itself is the most similar one, so we exclude it if so.
-        similar_indices = similar_indices[1:]
+    similar_indices = similar_indices[1:]
 
     # Fetch the details of the top N similar games then return
     similar_games = data_df.iloc[similar_indices]
