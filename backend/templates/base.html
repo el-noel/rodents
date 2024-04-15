@@ -7,10 +7,19 @@
 
 <body>
     <div class="full-body-container">
+        
         <div class="overlay-container">
+            <div class="sliding-row">
+                <div class="boardgame"><img src="static/images/starwars.png" alt="Boardgame 2"></div>
+                <div class="boardgame"><img src="static/images/tickettoride.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/catan.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/avalon.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
+                <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
+            </div>
             <div class="top-text flex-grid">
                 <div class="bold">
-                    Rodents
+                    Game Seeker
                 </div>
                 <div class="input-container" style="position: relative;">
                     <div class="input-box" onclick="sendFocus()">
@@ -19,7 +28,32 @@
                     </div>
                     <div id="suggestionsBox"></div>
                 </div>
-                    <label for="toggleSearch">Recommendation Mode:</label> <label class="switch">
+                    
+                      <div class="filters">
+                        <input placeholder="Min Age" id="min-age" type="number" min="1"/>
+                        <input placeholder="Min Players" id="min-players" type="number" min="1" />
+                        <input placeholder="Max Players" id="max-players" type="number" min="1"/>
+                        <select id="category">
+                            <option value="">Select a Category</option>
+                            <option value="Strategy">Strategy</option>
+                            <option value="Family">Family</option>
+                            <option value="Card Game">Card Game</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Puzzle">Puzzle</option>
+                            <!-- Add more categories as needed -->
+                        </select>
+                        <select id="sort-by">
+                            <option value="">Sort by</option>
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="age_asc">Min Age (Ascending)</option>
+                            <option value="age_desc">Min Age (Descending)</option>
+                            <option value="rating_asc">Rating (Low to High)</option>
+                            <option value="rating_desc">Rating (High to Low)</option>
+                        </select>
+                        <button onclick="filterText()">Search</button>
+                    </div>
+                    <label for="toggleSearch">Want to find a game similar to another title? Try recommendation mode:</label> <label class="switch">
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
@@ -42,8 +76,11 @@
                 <div class="boardgame"><img src="static/images/unstable.png" alt="Boardgame 3"></div>
                 <div class="boardgame"><img src="static/images/cham.png" alt="Boardgame 3"></div>
             </div>
+                    </div>
         </div>
+        
     </br>
+
     <div class="filters">
         <input placeholder="Exclude Keywords" id="exclude-keywords" type="text" />
         <input placeholder="Min Age" id="min-age" type="number" />
@@ -60,6 +97,7 @@
         </select>
         <button onclick="filterText()">Search</button>
     </div>
+
         <div id="answer-box">
         </div>
     </div>
@@ -153,7 +191,7 @@
             document.getElementById('filter-text-val').focus()
         }
 
-        function filterText(){
+        function filterText() {
             const titleValue = document.getElementById("filter-text-val").value;
             const excludeValue = document.getElementById("exclude-keywords").value;  // New exclude field
             const minAgeValue = document.getElementById("min-age").value || 0;
@@ -163,6 +201,9 @@
             const recommendationMode = document.querySelector('input[type="checkbox"]').checked ? 'recommendation' : 'regular';
             const filterMode = document.getElementById("filterMode").checked ? 'strict' : 'relaxed';
 
+            const sortBy = document.getElementById("sort-by").value;
+            const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
+        
             const queryParams = new URLSearchParams({
                 title: titleValue,
                 exclude: excludeValue,
@@ -173,11 +214,23 @@
                 mode: recommendationMode,
                 filter_mode: filterMode
             }).toString();
-
-            document.getElementById("answer-box").innerHTML = ""
+        
+            document.getElementById("answer-box").innerHTML = "";
             fetch("/games?" + queryParams)
-            .then((response) => response.json())
-            .then((data) => {
+            .then(response => response.json())
+            .then(data => {
+                data.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'name_asc': return a.name.localeCompare(b.name);
+                        case 'name_desc': return b.name.localeCompare(a.name);
+                        case 'age_asc': return a.minage - b.minage;
+                        case 'age_desc': return b.minage - a.minage;
+                        case 'rating_asc': return a.average - b.average;
+                        case 'rating_desc': return b.average - a.average;
+                        default: return 0;
+                    }
+                });
+        
                 const answerBox = document.getElementById("answer-box");
                 answerBox.innerHTML = "";
                 data.forEach(row => {
@@ -185,8 +238,9 @@
                     tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory, row.similarity_score);
                     answerBox.appendChild(tempDiv);
                 });
-            });
+            })
         }
+
         function toggleInfoPopup() {
             var popup = document.getElementById("infoPopup");
             if (popup.style.display === "none") {
@@ -194,7 +248,11 @@
             } else {
                 popup.style.display = "none";
             }
+
 }
             
+
+    }
+
     </script>
 </body>

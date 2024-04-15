@@ -115,7 +115,8 @@ def about(game_id):
         game_details["img"] = game_img
         game_reviews = fetch_game_reviews(game_details_query.reset_index(drop=True).at[0, "gamelink"])
         game_details["reviews"] = game_reviews
-
+        game_shop = fetch_amazon_links_and_prices(game_details_query.reset_index(drop=True).at[0, "gamelink"])
+        game_details["shop"] = game_shop
         return render_template('about.html', game=game_details)
     else:
         return "Game not found", 404
@@ -155,6 +156,19 @@ def fetch_game_reviews(game_link):
     else:
         print("Failed to fetch reviews.")
         return []
-    
+
+
+def fetch_amazon_links_and_prices(game_link):
+    game_url = f"https://boardgamegeek.com{game_link}"
+    response = requests.get(game_url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Locate all 'a' elements that contain links to Amazon
+        amazon_links = soup.find_all('li', {"ng-if": "::storesitemsctrl.amazon_ads.url"})
+        print(amazon_links)
+        return amazon_links
+    else:
+        return f"Failed to fetch the page, status code: {response.status_code}"
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
