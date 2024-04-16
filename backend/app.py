@@ -92,8 +92,11 @@ def search():
     )
     similarity_scores["total_similarity"] = similarity_scores['similarity'] * similarity_scores['total_weight']
     topWeightedResults = similarity_scores['total_similarity'].argsort()[::-1][:1000]
-
+    print(similarity_scores)
+    print("help", similarity_scores["total_similarity"])
     matches = data_df.loc[topWeightedResults]
+    matches['similarity_score'] = similarity_scores.loc[topWeightedResults, "total_similarity"]
+
 #left for strict filtering
     if min_age is not None:
         matches = matches[matches['minage'] >= min_age]
