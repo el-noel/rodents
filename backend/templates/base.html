@@ -1,5 +1,5 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
+<title>{% block title %}{% endblock %} GameSeeker</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
                     <div id="suggestionsBox"></div>
                 </div>
                     
-                      <div class="filters">
+                      <div class="select-filters">
                         <input placeholder="Min Age" id="min-age" type="number" min="1"/>
                         <input placeholder="Min Players" id="min-players" type="number" min="1" />
                         <input placeholder="Max Players" id="max-players" type="number" min="1"/>
@@ -124,9 +124,11 @@
         function answerBoxTemplate(name, description, average,id, min_age, min_players, max_players, category, similarityScore=null, minAgeValue, minPlayersValue, maxPlayersValue){
             let twosent = description.split('.').slice(0, 2).join('.') + '.';
             let categoriesArray = category.split(','); 
-            let categoriesList = '<ul> Category:';
+            let categoriesList = '<ul>';
             for (let i = 0; i < categoriesArray.length; i++) {
-                categoriesList += `<li>${categoriesArray[i].trim()}</li>`; 
+                let category = categoriesArray[i].trim();
+                category = category.replace(/[\[\]'"]/g, ''); 
+                categoriesList += `<li>${category}</li>`;
             }
             categoriesList += '</ul>';
             let similarityInfo = `<p class='similarity-score'>Similarity: ${similarityScore ? (similarityScore * 100).toFixed(2) + '%' : 'Not available'}</p>`;
@@ -141,15 +143,16 @@
                             <h3 class='game-title'>${name}</h3>
                             <p class='game-desc'>${twosent}</p>
                             <p class='sim-score'>${similarityInfo}</p>
-                            <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
+                            <p class='game-rating'>Average Rating: ${average.toFixed(2)}/10</p>
                         </div>
                         <div class='client-info'>
                             <p class='filters'>Min Age: ${min_age} ${minAgeCheck} </p>
                             <p class='filters'>Min Players: ${min_players} ${minPlayersCheck}</p>
                             <p class='filters'>Max Players: ${max_players} ${maxPlayersCheck}</p>
-                        <div>
+                        </div>
                         <div class='tags'>
-                            <p class='filters'>${categoriesList}</p>
+                            <p>Categories:</p>
+                            ${categoriesList}
                         </div>
                     </div>`;
         }
@@ -204,17 +207,6 @@
                 });
             })
         }
-        
-
-        function toggleInfoPopup() {
-            var popup = document.getElementById("infoPopup");
-            if (popup.style.display === "none") {
-                popup.style.display = "block";
-            } else {
-                popup.style.display = "none";
-            }
-    }
-
 
     </script>
 </body>

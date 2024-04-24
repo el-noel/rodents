@@ -22,12 +22,12 @@
     align-items: center;
     flex-direction: column;
 }
-div.filters input, div.filters select{
+div.select-filters input, div.select-filters select{
     border-radius: 100px;
     padding:12px;
     background: transparent;
 }
-.filters{
+.select-filters{
     padding-top: 2.5rem;
     padding-bottom: 2.5rem;
 }
@@ -178,6 +178,7 @@ body, html {
 .client-info{
     display: flex;
     justify-content: space-between;
+    width: 70%;
 }
 
 /*About.html*/
@@ -197,19 +198,14 @@ body, html {
 .about-page{
     padding: 5%;
 }
-.info-popup {
-    position: absolute;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    padding: 10px;
-    z-index: 10;
-    width: 300px; /* Adjust size as needed */
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-}
 
-.close-info {
-    float: right;
-    cursor: pointer;
-    padding: 2px 5px;
-    background: #ccc;
-    border-radius: 50%;}
+.tags ul{
+    display: flex;
+    list-style: none;
+}
+.tags ul li{
+    border-radius: 25px;
+    background: lavender;
+    padding: 15px;
+    margin-right: 25px;
+}
