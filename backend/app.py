@@ -90,10 +90,12 @@ def search():
         similarity_scores['players_weight'] *
         similarity_scores['category_weight']
     )
-    similarity_scores["total_similarity"] = similarity_scores['similarity'] * similarity_scores['total_weight']
+    similarity_scores["total_similarity"] = similarity_scores['similarity'] 
+    # * similarity_scores['total_weight']
     topWeightedResults = similarity_scores['total_similarity'].argsort()[::-1][:1000]
-    print(similarity_scores)
-    print("help", similarity_scores["total_similarity"])
+    # print(similarity_scores["total_weight"][topWeightedResults][:5])
+    # print(similarity_scores["similarity"][topWeightedResults][:5])
+    # print("help", similarity_scores["total_similarity"][topWeightedResults][:5])
     matches = data_df.loc[topWeightedResults]
     matches['similarity_score'] = similarity_scores.loc[topWeightedResults, "total_similarity"]
 
@@ -107,7 +109,10 @@ def search():
     if category:
         matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
 
-    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory']]
+    matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
+    # Sort matches by similarity_score in descending order
+    matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
+
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
