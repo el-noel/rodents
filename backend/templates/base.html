@@ -121,7 +121,7 @@
 
     <script>
 
-        function answerBoxTemplate(name, description, average,id, min_age, min_players, max_players, category, similarityScore=null){
+        function answerBoxTemplate(name, description, average,id, min_age, min_players, max_players, category, similarityScore=null, minAgeValue, minPlayersValue, maxPlayersValue){
             let twosent = description.split('.').slice(0, 2).join('.') + '.';
             let categoriesArray = category.split(','); 
             let categoriesList = '<ul> Category:';
@@ -131,27 +131,27 @@
             categoriesList += '</ul>';
             let similarityInfo = `<p class='similarity-score'>Similarity: ${similarityScore ? (similarityScore * 100).toFixed(2) + '%' : 'Not available'}</p>`;
 
-           // let minAgeCheck = parseInt(min_age, 10) >= parseInt(currentMinAge, 10) ? '✔️' : '❌';
-           // let minPlayersCheck = parseInt(min_players, 10) >= parseInt(currentMinPlayers, 10) ? '✔️' : '❌';
-           // let maxPlayersCheck = parseInt(max_players, 10) <= parseInt(currentMaxPlayers, 10) ? '✔️' : '❌';
-
-            //let categoryCheck = selectedCategory && categoriesArray.includes(selectedCategory) ? '✔️' : '❌';
-
+            let minAgeCheck = parseInt(min_age, 10) <= parseInt(minAgeValue, 10) ? '✔️' : '❌';
+            let minPlayersCheck = parseInt(min_players, 10) >= parseInt(minPlayersValue, 10) ? '✔️' : '❌';
+            let maxPlayersCheck = parseInt(max_players, 10) <= parseInt(maxPlayersValue, 10) ? '✔️' : '❌';
+        
 
             return `<div class='search-result' onclick="window.location.href='/about/${id}'">
-            <div class='game-info'>
-            <h3 class='game-title'>${name}</h3>
-            <p class='game-desc'>${twosent}</p>
-            <p class='sim-score'>${similarityInfo}</p>
-            <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
-            </div>
-            <div class='client-info'>
-                <p class='filters'>Min Age: ${min_age} </p>
-                <p class='filters'>Min Players: ${min_players}</p>
-                <p class='filters'>Max Players: ${max_players}</p>
-                <p class='filters'>${categoriesList}</p>
-            <div>
-        </div>`;
+                        <div class='game-info'>
+                            <h3 class='game-title'>${name}</h3>
+                            <p class='game-desc'>${twosent}</p>
+                            <p class='sim-score'>${similarityInfo}</p>
+                            <p class='game-rating'>Average Rating: ${average.toFixed(2)}</p>
+                        </div>
+                        <div class='client-info'>
+                            <p class='filters'>Min Age: ${min_age} ${minAgeCheck} </p>
+                            <p class='filters'>Min Players: ${min_players} ${minPlayersCheck}</p>
+                            <p class='filters'>Max Players: ${max_players} ${maxPlayersCheck}</p>
+                        <div>
+                        <div class='tags'>
+                            <p class='filters'>${categoriesList}</p>
+                        </div>
+                    </div>`;
         }
 
         function sendFocus(){
@@ -199,7 +199,7 @@
                 answerBox.innerHTML = "";
                 data.forEach(row => {
                     let tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory, row.similarity_score);
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.description, row.average, row.objectid, row.minage, row.minplayers, row.maxplayers, row.boardgamecategory, row.similarity_score, minAgeValue, minPlayersValue, maxPlayersValue);
                     answerBox.appendChild(tempDiv);
                 });
             })
