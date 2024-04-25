@@ -133,9 +133,10 @@
             categoriesList += '</ul>';
             let similarityInfo = `<p class='similarity-score'>Similarity: ${similarityScore ? (similarityScore * 100).toFixed(2) + '%' : 'Not available'}</p>`;
 
-            let minAgeCheck = parseInt(min_age, 10) <= parseInt(minAgeValue, 10) ? '✔️' : '❌';
+            let minAgeCheck = parseInt(min_age, 10) >= parseInt(minAgeValue, 10) ? '✔️' : '❌';
             let minPlayersCheck = parseInt(min_players, 10) >= parseInt(minPlayersValue, 10) ? '✔️' : '❌';
             let maxPlayersCheck = parseInt(max_players, 10) <= parseInt(maxPlayersValue, 10) ? '✔️' : '❌';
+            
         
 
             return `<div class='search-result' onclick="window.location.href='/about/${id}'">

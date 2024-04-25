@@ -100,14 +100,14 @@ def search():
     matches['similarity_score'] = similarity_scores.loc[topWeightedResults, "total_similarity"]
 
 #left for strict filtering
-    if min_age is not None:
-        matches = matches[matches['minage'] >= min_age]
-    if min_players is not None:
-        matches = matches[matches['minplayers'] >= min_players]
-    if max_players is not None:
-        matches = matches[matches['maxplayers'] <= max_players]
-    if category:
-        matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
+    # if min_age is not None:
+    #     matches = matches[matches['minage'] >= min_age]
+    # if min_players is not None:
+    #     matches = matches[matches['minplayers'] >= min_players]
+    # if max_players is not None:
+    #     matches = matches[matches['maxplayers'] <= max_players]
+    # if category:
+    #     matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
 
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
     # Sort matches by similarity_score in descending order
