@@ -164,9 +164,22 @@ def clean_name(name):
     cleaned_words = [word for word in words if word not in common_words]
     return ' '.join(cleaned_words)
 
-def is_matching_title(row_title, search_title):
-    # Check if one title is a substring of the other or if they are equal
-    return row_title in search_title or search_title in row_title
+def fuzzy_match(str1, str2):
+    # Normalize and clean both strings by removing spaces and converting to lowercase
+    clean_str1 = ''.join(str1.lower().split())
+    clean_str2 = ''.join(str2.lower().split())
+
+    # Use a set to find the common characters
+    common_chars = set(clean_str1) & set(clean_str2)
+    num_common_chars = sum(min(clean_str1.count(char), clean_str2.count(char)) for char in common_chars)
+
+    # Calculate the total number of characters
+    total_chars = len(clean_str1) + len(clean_str2)
+
+    # Return the fuzzy match score as the ratio of twice the number of common characters to the total number of characters
+    if total_chars == 0:
+        return 0  # Avoid division by zero
+    return (2 * num_common_chars) / total_chars
 
 @app.route("/about/<game_id>")
 def about(game_id):
@@ -175,22 +188,26 @@ def about(game_id):
     if not game_details_query.empty:
         game_details = game_details_query.iloc[0].to_dict()
         # game_img = fetch_game_link(game_details_query["gamelink"])
+        game_details['baverage'] = round(game_details['baverage'], 2)
         game_img = fetch_game_link(game_details_query.reset_index(drop=True).at[0, "gamelink"])
         game_title = game_details['name']
         game_details["img"] = game_img
+        if not game_img:
+            game_img = "No Image Found"
         # Apply fuzzy matching to find a related title in the meta dataframe
         cleaned_game_title = clean_name(game_title)
-        reviews_df['cleaned_name'] = reviews_df['title'].apply(clean_name)
+        reviews_df['cleaned_name'] = reviews_df['title'].apply(lambda x: clean_name(x))
+        game_title_cleaned = clean_name(game_title)
         matching_reviews = pd.DataFrame()
-        matching_reviews = reviews_df[reviews_df['cleaned_name'].apply(lambda x: is_matching_title(x, cleaned_game_title))]
+        matching_reviews = reviews_df[reviews_df['cleaned_name'].apply(lambda x: fuzzy_match(x, game_title_cleaned) >= 0.8)]
         print(matching_reviews)
         if not matching_reviews.empty:
             # Add reviews to game_details
-            game_reviews = matching_reviews[['title', 'text']].to_dict(orient='records')
+            game_reviews = matching_reviews['text'].to_list()[:3]
             game_details["reviews"] = game_reviews
             print(game_reviews)
         else:
-            game_details["reviews"] = [{"title": "No reviews available", "text": ""}]
+            game_details["reviews"] = [""]
         game_details["shop"] = []
         return render_template('about.html', game=game_details)
     else:
