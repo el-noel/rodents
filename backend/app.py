@@ -19,8 +19,10 @@ data_df = pd.read_csv(csv_file_path)
 
 # for cosine sim
 data_df['processed_description'] = data_df['description'].apply(lambda x: x.lower() if isinstance(x, str) else '')
+data_df['proc_name'] = data_df['name'].apply(lambda x: x.lower() if isinstance(x, str) else '')
 tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(data_df['processed_description'].values.astype('U'))  # 'U' for Unicode
+combined = data_df['processed_description'] + data_df['name']
+tfidf_matrix = tfidf_vectorizer.fit_transform(combined)
 
 #for SVD
 svd_model = TruncatedSVD(n_components=100)
@@ -88,7 +90,6 @@ def search():
     matches['similarity_score'] = 1 - similarity_scores.loc[topWeightedResults, "total_similarity"]
 
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
-    # matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
@@ -117,13 +118,6 @@ def recommendation_search(query):
         similar_games = data_df.iloc[similar_indices]
         
         return cosine_similarities, similar_games
-    #for testing purposes
-        # print(cosine_similarities[game_index])
-        # print("man...", cosine_similarities[:10])
-        # print("scores")
-        # print(cosine_similarities[similar_indices[:10]])
-        # print("results")
-        # print(data_df.iloc[similar_indices[:1]][['name', 'processed_description']])
 
 @app.route("/about/<game_id>")
 def about(game_id):
