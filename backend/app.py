@@ -6,6 +6,8 @@ import html
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
+import json, re
+from difflib import SequenceMatcher
 
 
 
@@ -42,6 +44,17 @@ def suggestions():
     matching_games = data_df[data_df['name'].str.contains(query_partial, case = False)]['name'].unique().tolist()
     suggestions = matching_games[:5]
     return jsonify(suggestions)
+
+def load_jsonl(input_path):
+    data = []
+    with open(input_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            data.append(json.loads(line))
+    return pd.DataFrame(data)
+
+# Path to your JSONL file
+jsonl_file_path = 'data/output3.jsonl'
+reviews_df = load_jsonl(jsonl_file_path)
 
 def makeWeightVectors(weight_mat, mode, min_age, min_players, max_players, category, text, data):
     if mode == 'recommendation':
@@ -111,7 +124,7 @@ def search():
 
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
     # Sort matches by similarity_score in descending order
-    matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
+    # matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
 
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
@@ -142,7 +155,18 @@ def recommendation_search(query):
         similar_indices = cosine_similarities.argsort()[::-1]
         similar_games = data_df.iloc[similar_indices] 
     return cosine_similarities, similar_games
-    
+
+common_words = set(['the', 'of', 'and', 'in', 'to', 'a'])
+
+def clean_name(name):
+    # Remove common words and extra spaces
+    words = name.lower().split()
+    cleaned_words = [word for word in words if word not in common_words]
+    return ' '.join(cleaned_words)
+
+def is_matching_title(row_title, search_title):
+    # Check if one title is a substring of the other or if they are equal
+    return row_title in search_title or search_title in row_title
 
 @app.route("/about/<game_id>")
 def about(game_id):
@@ -152,11 +176,22 @@ def about(game_id):
         game_details = game_details_query.iloc[0].to_dict()
         # game_img = fetch_game_link(game_details_query["gamelink"])
         game_img = fetch_game_link(game_details_query.reset_index(drop=True).at[0, "gamelink"])
+        game_title = game_details['name']
         game_details["img"] = game_img
-        game_reviews = fetch_game_reviews(game_details_query.reset_index(drop=True).at[0, "gamelink"])
-        game_details["reviews"] = game_reviews
-        game_shop = fetch_amazon_links_and_prices(game_details_query.reset_index(drop=True).at[0, "gamelink"])
-        game_details["shop"] = game_shop
+        # Apply fuzzy matching to find a related title in the meta dataframe
+        cleaned_game_title = clean_name(game_title)
+        reviews_df['cleaned_name'] = reviews_df['title'].apply(clean_name)
+        matching_reviews = pd.DataFrame()
+        matching_reviews = reviews_df[reviews_df['cleaned_name'].apply(lambda x: is_matching_title(x, cleaned_game_title))]
+        print(matching_reviews)
+        if not matching_reviews.empty:
+            # Add reviews to game_details
+            game_reviews = matching_reviews[['title', 'text']].to_dict(orient='records')
+            game_details["reviews"] = game_reviews
+            print(game_reviews)
+        else:
+            game_details["reviews"] = [{"title": "No reviews available", "text": ""}]
+        game_details["shop"] = []
         return render_template('about.html', game=game_details)
     else:
         return "Game not found", 404
@@ -169,46 +204,46 @@ def fetch_game_link(game_link):
         soup = BeautifulSoup(response.text, 'html.parser')
         # img_tag = soup.find('meta', attrs={"property": "og:image", })
         link_tags = soup.find_all('link', attrs={"rel": "preload", "as": "image"})
-        if len(link_tags) > 1:
-            return link_tags[1]['href']
-        else:
+        if link_tags:
             return link_tags[0]['href']
+        else:
+            return "No image found"
     else:
         return f"Cannot find image"
     
-def fetch_game_reviews(game_link):
-    game_url = f"https://boardgamegeek.com{game_link}/ratings"
-    print("Fetching reviews from:", game_url)
-    response = requests.get(game_url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        review_list_items = soup.find_all('li', class_="summary-item summary-rating-item ng-scope")
-        reviews = []
-        for item in review_list_items:
-            expandable_div = item.find('div', class_="expandable-body")
-            if expandable_div:
-                review_span = expandable_div.find('span', {"ng-bind-html": "::item.textfield.comment.rendered|to_trusted", "class": "ng-binding ng-scope"})
-                if review_span:
-                    review_text = review_span.get_text(strip=True)
-                    reviews.append(review_text)
-        print(f"Found {len(reviews)} reviews.")
-        return reviews
-    else:
-        print("Failed to fetch reviews.")
-        return []
+# def fetch_game_reviews(game_link):
+#     game_url = f"https://boardgamegeek.com{game_link}/ratings"
+#     print("Fetching reviews from:", game_url)
+#     response = requests.get(game_url)
+#     if response.status_code == 200:
+#         soup = BeautifulSoup(response.text, 'html.parser')
+#         review_list_items = soup.find_all('li', class_="summary-item summary-rating-item ng-scope")
+#         reviews = []
+#         for item in review_list_items:
+#             expandable_div = item.find('div', class_="expandable-body")
+#             if expandable_div:
+#                 review_span = expandable_div.find('span', {"ng-bind-html": "::item.textfield.comment.rendered|to_trusted", "class": "ng-binding ng-scope"})
+#                 if review_span:
+#                     review_text = review_span.get_text(strip=True)
+#                     reviews.append(review_text)
+#         print(f"Found {len(reviews)} reviews.")
+#         return reviews
+#     else:
+#         print("Failed to fetch reviews.")
+#         return []
 
 
-def fetch_amazon_links_and_prices(game_link):
-    game_url = f"https://boardgamegeek.com{game_link}"
-    response = requests.get(game_url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        # Locate all 'a' elements that contain links to Amazon
-        amazon_links = soup.find_all('li', {"ng-if": "::storesitemsctrl.amazon_ads.url"})
-        print(amazon_links)
-        return amazon_links
-    else:
-        return f"Failed to fetch the page, status code: {response.status_code}"
+# def fetch_amazon_links_and_prices(game_link):
+#     game_url = f"https://boardgamegeek.com{game_link}"
+#     response = requests.get(game_url)
+#     if response.status_code == 200:
+#         soup = BeautifulSoup(response.text, 'html.parser')
+#         # Locate all 'a' elements that contain links to Amazon
+#         amazon_links = soup.find_all('li', {"ng-if": "::storesitemsctrl.amazon_ads.url"})
+#         print(amazon_links)
+#         return amazon_links
+#     else:
+#         return f"Failed to fetch the page, status code: {response.status_code}"
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
