@@ -58,10 +58,6 @@
                         <input type="checkbox" id="toggleMode">
                         <span class="slider"></span>
                       </label>
-                      <label for="filterMode">Filtering Mode:</label> <label class="switch">
-                        <input type="checkbox" id="filterMode">
-                        <span class="slider"></span>
-                    </label>
                     </div>
                     
         </div>
@@ -171,7 +167,6 @@
             const categoryValue = document.getElementById("category").value;
             const sortBy = document.getElementById("sort-by").value;
             const recommendationMode = document.getElementById("toggleMode").checked ? 'recommendation' : 'regular';
-            const filterMode = document.getElementById("filterMode").checked ? 'strict' : 'relaxed';
         
             const queryParams = new URLSearchParams({
                 title: titleValue,
@@ -180,7 +175,6 @@
                 max_players: maxPlayersValue,
                 category: categoryValue,
                 mode: recommendationMode,
-                filter_mode: filterMode
                 
             }).toString();
         
