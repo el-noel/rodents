@@ -9,7 +9,10 @@
 </head>
 <body class="about-page">
     <div class="game-details-container">
-        <div class="game-image-div"><img src={{game.img}}></img></div>
+        <div class="game-image-div">
+            <img src={{game.img}}></img>
+            <p>Image Source: BoardGameGeek</p>
+        </div>
         <div class="game-information">
             <h1>{{ game.name }}</h1>
             <!-- <img src="{{ game.image_url }}" alt="{{ game.name }} cover" class="game-cover"> -->
@@ -26,8 +29,7 @@
                 <h3>User Reviews</h3>
                 {% for review in game.reviews %}
                 <div class="review">
-                    <h4>{{ review.title }}</h4>
-                    <p>{{ review.text }}</p>
+                    <p>{{ review }}</p>
                 </div>
                 {% endfor %}
             </div>
@@ -35,7 +37,8 @@
             
             {% endif %}
             <!-- Add more game details here as needed -->
-            <a href="/">Back to Home</a>
+            <p>Review Source: Amazon</p>
+            <a href="/" class="back">Back to Home</a>
         </div>
     </div>
 </body>
