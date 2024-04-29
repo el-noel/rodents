@@ -132,11 +132,18 @@ def about(game_id):
     if not game_details_query.empty:
         game_details = game_details_query.iloc[0].to_dict()
         # game_img = fetch_game_link(game_details_query["gamelink"])
+        game_details['baverage'] = round(game_details['baverage'], 2)
         game_img = fetch_game_link(game_details_query.reset_index(drop=True).at[0, "gamelink"])
         game_details["img"] = game_img
+        if not game_img:
+            game_img = "No Image Found"
         game_reviews = fetch_game_reviews(game_details_query.reset_index(drop=True).at[0, "gamelink"])
+        if not game_reviews:
+            game_reviews = "No reviews found."
         game_details["reviews"] = game_reviews
         game_shop = fetch_amazon_links_and_prices(game_details_query.reset_index(drop=True).at[0, "gamelink"])
+        if not game_shop:
+            game_shop = "No shopping links available."
         game_details["shop"] = game_shop
         return render_template('about.html', game=game_details)
     else:
@@ -174,9 +181,10 @@ def fetch_game_reviews(game_link):
                     reviews.append(review_text)
         print(f"Found {len(reviews)} reviews.")
         return reviews
+    if len(reviews) == 0:
+        return "No reviews found at this time"
     else:
-        print("Failed to fetch reviews.")
-        return []
+        return
 
 
 def fetch_amazon_links_and_prices(game_link):
@@ -188,8 +196,10 @@ def fetch_amazon_links_and_prices(game_link):
         amazon_links = soup.find_all('li', {"ng-if": "::storesitemsctrl.amazon_ads.url"})
         print(amazon_links)
         return amazon_links
+    if len(amazon_links) == 0:
+        return "No links available at this time"
     else:
-        return f"Failed to fetch the page, status code: {response.status_code}"
+        return amazon_links
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)

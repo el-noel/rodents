@@ -93,14 +93,6 @@ body, html {
     object-fit: cover; 
 }
 
-@keyframes slide {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(-50%); 
-    }
-}
 .overlay-container {
     position: relative; 
 }
@@ -191,6 +183,7 @@ body, html {
     margin: auto;
     align-items: center;
     justify-content: space-evenly;
+    padding-bottom: 25px;
 }
 .game-information{
     width: 60%;
@@ -208,4 +201,16 @@ body, html {
     background: lavender;
     padding: 15px;
     margin-right: 25px;
+}
+.back{
+    text-decoration: none;
+    border-radius: 5px;
+    background: lavender;
+    padding: 12px;
+    margin-top: 12px;
+}
+.search{
+    border-radius: 15px;
+    background: lavender;
+    padding: 12px;
 }
