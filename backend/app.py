@@ -85,7 +85,7 @@ def search():
     topWeightedResults = similarity_scores['total_similarity'].argsort()[::-1][:1000]
 
     matches = data_df.loc[topWeightedResults]
-    matches['similarity_score'] = similarity_scores.loc[topWeightedResults, "total_similarity"]
+    matches['similarity_score'] = 1 - similarity_scores.loc[topWeightedResults, "total_similarity"]
 
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
     # matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
