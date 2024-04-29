@@ -201,10 +201,10 @@ def fetch_game_link(game_link):
         soup = BeautifulSoup(response.text, 'html.parser')
         # img_tag = soup.find('meta', attrs={"property": "og:image", })
         link_tags = soup.find_all('link', attrs={"rel": "preload", "as": "image"})
-        if link_tags:
-            return link_tags[0]['href']
+        if len(link_tags) > 1:
+            return link_tags[1]['href']
         else:
-            return "No image found"
+            return link_tags[0]['href']
     else:
         return f"Cannot find image"
 
