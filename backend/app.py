@@ -8,8 +8,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 
 
-
-
 import requests
 from bs4 import BeautifulSoup
 app = Flask(__name__)
@@ -65,6 +63,7 @@ def makeWeightVectors(weight_mat, mode, min_age, min_players, max_players, categ
 
     return weight_mat
 
+
 @app.route("/games")
 def search():
     text = request.args.get("title")
@@ -81,38 +80,15 @@ def search():
         cossim, sorted_games = description_search(text)
  
     similarity_scores = pd.DataFrame(cossim, columns=['similarity'], index=sorted_games.index)
-    similarity_scores = makeWeightVectors(similarity_scores, mode, min_age, min_players, max_players, category, text, sorted_games)
 
-    similarity_scores['total_weight'] = (
-        similarity_scores['similarity'] *
-        similarity_scores['title_weight'] *
-        similarity_scores['age_weight'] *
-        similarity_scores['players_weight'] *
-        similarity_scores['category_weight']
-    )
-    similarity_scores["total_similarity"] = similarity_scores['similarity'] 
-    # * similarity_scores['total_weight']
+    similarity_scores["total_similarity"] = similarity_scores['similarity']
     topWeightedResults = similarity_scores['total_similarity'].argsort()[::-1][:1000]
-    # print(similarity_scores["total_weight"][topWeightedResults][:5])
-    # print(similarity_scores["similarity"][topWeightedResults][:5])
-    # print("help", similarity_scores["total_similarity"][topWeightedResults][:5])
+
     matches = data_df.loc[topWeightedResults]
     matches['similarity_score'] = similarity_scores.loc[topWeightedResults, "total_similarity"]
 
-#left for strict filtering
-    # if min_age is not None:
-    #     matches = matches[matches['minage'] >= min_age]
-    # if min_players is not None:
-    #     matches = matches[matches['minplayers'] >= min_players]
-    # if max_players is not None:
-    #     matches = matches[matches['maxplayers'] <= max_players]
-    # if category:
-    #     matches = matches[matches['boardgamecategory'].str.contains(category, case=False, na=False)]
-
     matches_filtered = matches[['name', 'description', 'average', 'objectid', 'minage', 'minplayers', 'maxplayers', 'boardgamecategory', 'similarity_score']]
-    # Sort matches by similarity_score in descending order
-    matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
-
+    # matches_filtered.sort_values(by='similarity_score', ascending=False, inplace=True)
     matches_filtered['name'] = matches_filtered['name'].apply(html.unescape)
     matches_filtered['description'] = matches_filtered['description'].apply(html.unescape)
     matches_filtered_json = matches_filtered.to_json(orient='records')
@@ -127,22 +103,27 @@ def description_search(query):
         query_svd = svd_model.transform(query_vector)
         cosine_similarities = cosine_similarity(query_svd, svd_matrix).flatten()     
         similar_indices = cosine_similarities.argsort()[::-1]
-        # [-(1000+1):] 
         return cosine_similarities, data_df.iloc[similar_indices]
 
-#not filtering out same game now for some reason UGH
 def recommendation_search(query):
     if query:
         game_index = data_df[data_df['name'].str.lower() == query.lower()].index[0]
         game_row = data_df.loc[game_index]
         game_description = game_row['processed_description']
         query_vector = tfidf_vectorizer.transform([game_description])
-        cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()   
+        cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten() 
         cosine_similarities[game_index] = "-inf"
         similar_indices = cosine_similarities.argsort()[::-1]
-        similar_games = data_df.iloc[similar_indices] 
-    return cosine_similarities, similar_games
-    
+        similar_games = data_df.iloc[similar_indices]
+        
+        return cosine_similarities, similar_games
+    #for testing purposes
+        # print(cosine_similarities[game_index])
+        # print("man...", cosine_similarities[:10])
+        # print("scores")
+        # print(cosine_similarities[similar_indices[:10]])
+        # print("results")
+        # print(data_df.iloc[similar_indices[:1]][['name', 'processed_description']])
 
 @app.route("/about/<game_id>")
 def about(game_id):
