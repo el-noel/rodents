@@ -20,8 +20,20 @@
             {% endif %}
             <p><strong>Minimum Age:</strong> {{game.minage}} years</p>
             <p><strong>Minimum Playtime:</strong> {{game.minplaytime}} minutes</p>
-            <p><strong>Reviews:</strong> {{game.reviews}}</p>
-            <p><strong>Amazon Link:</strong> {{game.shop}}</p>
+            <!-- <p><strong>Reviews:</strong> {{game.reviews}}</p> -->
+            {% if game.reviews and game.reviews != "No reviews available for this game." %}
+            <div class="reviews">
+                <h3>User Reviews</h3>
+                {% for review in game.reviews %}
+                <div class="review">
+                    <h4>{{ review.title }}</h4>
+                    <p>{{ review.text }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            
+            {% endif %}
             <!-- Add more game details here as needed -->
             <a href="/">Back to Home</a>
         </div>
