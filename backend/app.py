@@ -203,7 +203,7 @@ def fetch_game_link(game_link):
         link_tags = soup.find_all('link', attrs={"rel": "preload", "as": "image"})
         if len(link_tags) > 1:
             return link_tags[1]['href']
-        else:
+        if len(link_tags) != 0:
             return link_tags[0]['href']
     else:
         return f"Cannot find image"
